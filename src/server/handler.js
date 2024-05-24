@@ -1,16 +1,17 @@
 const firebase = require('firebase');
 const { ClientError } = require('./exceptions/ClientError');
 const Joi = require('joi');
+const { predictClassification } = require('../services/inferenceService'); 
 
 // Firebase configuration and initialization
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "API_KEY",
+    authDomain: "AUTH_DOMAIN",
+    databaseURL: "DATABASE_URL",
+    projectId: "PROJECT_ID",
+    storageBucket: "STORAGE_BUCKET",
+    messagingSenderId: "MESSAGING_SENDER_ID",
+    appId: "APP_ID"
 };
 
 if (!firebase.apps.length) {
@@ -29,7 +30,11 @@ async function postPredictionsHandler(request, h) {
             name: Joi.string().required(),
             age: Joi.number().integer().min(0).required(),
             weight: Joi.number().positive().required(),
-            height: Joi.number().positive().required()
+            height: Joi.number().positive().required(),
+            headCircumference: Joi.number().positive().required(),
+            armCircumference: Joi.number().positive().required(),
+            abdomenCircumference: Joi.number().positive().required(),
+            chestCircumference: Joi.number().positive().required()
         });
 
         const { error, value } = schema.validate(data);
@@ -38,13 +43,19 @@ async function postPredictionsHandler(request, h) {
         }
 
         // Prepare input for the model
-        const inputBuffer = new Float32Array([value.age, value.weight, value.height]);
-        model.setInput(0, inputBuffer);
+        const measurements = {
+            headCircumference: value.headCircumference,
+            armCircumference: value.armCircumference,
+            abdomenCircumference: value.abdomenCircumference,
+            chestCircumference: value.chestCircumference,
+            height: value.height
+        };
+
+        // Assuming imageBuffer is provided in the payload
+        const imageBuffer = data.imageBuffer;
 
         // Make prediction using the model
-        model.invoke();
-        const outputBuffer = model.getOutput(0);
-        const prediction = outputBuffer[0];
+        const predictionResult = await predictClassification(model, imageBuffer, measurements);
 
         // Save prediction to Firebase
         const newPredictionRef = db.ref('predictions').push();
@@ -53,7 +64,13 @@ async function postPredictionsHandler(request, h) {
             age: value.age,
             weight: value.weight,
             height: value.height,
-            prediction: prediction,
+            headCircumference: value.headCircumference,
+            armCircumference: value.armCircumference,
+            abdomenCircumference: value.abdomenCircumference,
+            chestCircumference: value.chestCircumference,
+            prediction: predictionResult.label,
+            confidence: predictionResult.confidence,
+            suggestion: predictionResult.suggestion,
             createdAt: new Date().toISOString()
         });
 
@@ -65,7 +82,13 @@ async function postPredictionsHandler(request, h) {
                 age: value.age,
                 weight: value.weight,
                 height: value.height,
-                prediction: prediction
+                headCircumference: value.headCircumference,
+                armCircumference: value.armCircumference,
+                abdomenCircumference: value.abdomenCircumference,
+                chestCircumference: value.chestCircumference,
+                prediction: predictionResult.label,
+                confidence: predictionResult.confidence,
+                suggestion: predictionResult.suggestion
             }
         }).code(201);
     } catch (error) {
