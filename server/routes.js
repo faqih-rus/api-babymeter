@@ -8,7 +8,15 @@ const routes = [
     {
         method: 'POST',
         path: '/baby',
-        handler: postPredictionsHandler
+        handler: postPredictionsHandler,
+        options: {
+            payload : {
+                allow: 'multipart/form-data',
+                parse: true,
+                output: 'data',
+                maxBytes: 5 * 1024 * 1024
+            }
+        }
     },
     {
         method: 'GET',
