@@ -1,31 +1,20 @@
-const firebase = require('firebase');
-const { ClientError } = require('./exceptions/ClientError');
+const { ClientError } = require('../exceptions/ClientError');
 const Joi = require('joi');
-const { predictClassification } = require('../services/inferenceService'); 
+const { predictClassification } = require('../services/inferenceService');
+const storePredictionData = require('../services/storeData');
+const loadModel = require('../services/loadModel');
+const firebase = require('firebase');
 
-// Firebase configuration and initialization
-const firebaseConfig = {
-    apiKey: "API_KEY",
-    authDomain: "AUTH_DOMAIN",
-    databaseURL: "DATABASE_URL",
-    projectId: "PROJECT_ID",
-    storageBucket: "STORAGE_BUCKET",
-    messagingSenderId: "MESSAGING_SENDER_ID",
-    appId: "APP_ID"
-};
+let model;
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
-const db = firebase.database();
+(async () => {
+    model = await loadModel();
+})();
 
 async function postPredictionsHandler(request, h) {
     try {
-        const { model } = request.server.app;
         const data = request.payload;
 
-        // Validate input data
         const schema = Joi.object({
             name: Joi.string().required(),
             age: Joi.number().integer().min(0).required(),
@@ -42,7 +31,6 @@ async function postPredictionsHandler(request, h) {
             throw new ClientError(error.details[0].message);
         }
 
-        // Prepare input for the model
         const measurements = {
             headCircumference: value.headCircumference,
             armCircumference: value.armCircumference,
@@ -51,41 +39,21 @@ async function postPredictionsHandler(request, h) {
             height: value.height
         };
 
-        // Assuming imageBuffer is provided in the payload
         const imageBuffer = data.imageBuffer;
 
-        // Make prediction using the model
         const predictionResult = await predictClassification(model, imageBuffer, measurements);
 
-        // Save prediction to Firebase
-        const newPredictionRef = db.ref('predictions').push();
-        await newPredictionRef.set({
-            name: value.name,
-            age: value.age,
-            weight: value.weight,
-            height: value.height,
-            headCircumference: value.headCircumference,
-            armCircumference: value.armCircumference,
-            abdomenCircumference: value.abdomenCircumference,
-            chestCircumference: value.chestCircumference,
+        await storePredictionData({
+            ...value,
             prediction: predictionResult.label,
             confidence: predictionResult.confidence,
-            suggestion: predictionResult.suggestion,
-            createdAt: new Date().toISOString()
+            suggestion: predictionResult.suggestion
         });
 
-        // Return response
         return h.response({
             status: 'success',
             data: {
-                name: value.name,
-                age: value.age,
-                weight: value.weight,
-                height: value.height,
-                headCircumference: value.headCircumference,
-                armCircumference: value.armCircumference,
-                abdomenCircumference: value.abdomenCircumference,
-                chestCircumference: value.chestCircumference,
+                ...value,
                 prediction: predictionResult.label,
                 confidence: predictionResult.confidence,
                 suggestion: predictionResult.suggestion

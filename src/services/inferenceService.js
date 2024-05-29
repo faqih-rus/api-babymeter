@@ -14,12 +14,9 @@ async function predictClassification(model, imageBuffer, measurements) {
         const imageScore = imageOutput.dataSync();
         const imageConfidence = Math.max(...imageScore) * 100;
 
-        // Assuming measurements is an object with keys: headCircumference, armCircumference, abdomenCircumference, chestCircumference, height
         const { headCircumference, armCircumference, abdomenCircumference, chestCircumference, height } = measurements;
 
-        // Placeholder for combining model results with physical measurements
-        // Here you need to implement a method to combine the results, 
-        // this could be a different model or statistical method.
+        // Combine image model output with physical measurements
         const combinedScore = calculateCombinedScore(imageScore, measurements);
 
         // Determine classification label
@@ -27,7 +24,6 @@ async function predictClassification(model, imageBuffer, measurements) {
         const classResult = tflite.argMax(combinedScore, 1).dataSync()[0];
         const label = classes[classResult];
 
-        // Provide suggestion based on label
         let suggestion;
         if (label === 'Sehat') {
             suggestion = 'Bayi Anda sehat. Lanjutkan pemberian gizi yang baik dan pemeriksaan rutin.';
@@ -37,7 +33,6 @@ async function predictClassification(model, imageBuffer, measurements) {
             suggestion = 'Bayi Anda mengalami stunting stadium 2. Segera konsultasi dengan dokter anak untuk penanganan lebih lanjut.';
         }
 
-        // Return result
         return {
             label,
             confidence: imageConfidence,
@@ -50,11 +45,6 @@ async function predictClassification(model, imageBuffer, measurements) {
 }
 
 function calculateCombinedScore(imageScore, measurements) {
-    // This function should combine the image model output with physical measurements.
-    // Implement your logic here. This could involve a secondary model or a weighted sum.
-    // For now, we'll assume a simple weighted sum as a placeholder.
-
-    // Placeholder weights for demonstration purposes
     const weights = {
         headCircumference: 0.2,
         armCircumference: 0.2,
@@ -69,7 +59,6 @@ function calculateCombinedScore(imageScore, measurements) {
         (measurements.chestCircumference * weights.chestCircumference) +
         (measurements.height * weights.height);
 
-    // Combine image score with measurement score
     const combinedScore = imageScore.map((score, index) => score + measurementScore * weights[index]);
 
     return combinedScore;
