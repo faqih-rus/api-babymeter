@@ -1,4 +1,4 @@
-const tflite = require('tflite-node');
+const tflite = require('@tensorflow/tfjs-node');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
