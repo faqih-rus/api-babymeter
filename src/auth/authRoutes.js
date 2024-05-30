@@ -1,25 +1,16 @@
-const authController = require('./authController');
-const authValidation = require('./authValidation');
+const { registerHandler, loginHandler } = require('./authController');
 
-module.exports = [
+const routes = [
     {
         method: 'POST',
         path: '/auth/register',
-        handler: authController.register,
-        options: {
-            validate: {
-                payload: authValidation.register
-            }
-        }
+        handler: registerHandler
     },
     {
         method: 'POST',
         path: '/auth/login',
-        handler: authController.login,
-        options: {
-            validate: {
-                payload: authValidation.login
-            }
-        }
+        handler: loginHandler
     }
 ];
+
+module.exports = routes;

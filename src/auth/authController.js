@@ -1,27 +1,42 @@
-const authService = require('./authService');
-const Boom = require('@hapi/boom');
+const Joi = require('joi');
+const { register, login } = require('./authService');
 
-const register = async (request, h) => {
-    try {
-        const { email, password, role, nik } = request.payload;
-        const user = await authService.register({ email, password, role, nik });
-        return h.response(user).code(201);
-    } catch (error) {
-        return Boom.badImplementation(error.message);
+async function registerHandler(request, h) {
+    const schema = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required()
+    });
+
+    const { error, value } = schema.validate(request.payload);
+    if (error) {
+        return h.response({ status: 'fail', message: error.details[0].message }).code(400);
     }
-};
 
-const login = async (request, h) => {
     try {
-        const { email, password } = request.payload;
-        const token = await authService.login({ email, password });
-        return h.response({ token }).code(200);
-    } catch (error) {
-        return Boom.unauthorized(error.message);
+        const user = await register(value);
+        return h.response({ status: 'success', user }).code(201);
+    } catch (err) {
+        return h.response({ status: 'fail', message: err.message }).code(400);
     }
-};
+}
 
-module.exports = {
-    register,
-    login
-};
+async function loginHandler(request, h) {
+    const schema = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required()
+    });
+
+    const { error, value } = schema.validate(request.payload);
+    if (error) {
+        return h.response({ status: 'fail', message: error.details[0].message }).code(400);
+    }
+
+    try {
+        const token = await login(value);
+        return h.response({ status: 'success', token }).code(200);
+    } catch (err) {
+        return h.response({ status: 'fail', message: err.message }).code(400);
+    }
+}
+
+module.exports = { registerHandler, loginHandler };

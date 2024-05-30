@@ -23,7 +23,8 @@ async function postPredictionsHandler(request, h) {
             headCircumference: Joi.number().positive().required(),
             armCircumference: Joi.number().positive().required(),
             abdomenCircumference: Joi.number().positive().required(),
-            chestCircumference: Joi.number().positive().required()
+            chestCircumference: Joi.number().positive().required(),
+            imageBuffer: Joi.binary().required()
         });
 
         const { error, value } = schema.validate(data);
@@ -39,14 +40,14 @@ async function postPredictionsHandler(request, h) {
             height: value.height
         };
 
-        const imageBuffer = data.imageBuffer;
+        const imageBuffer = value.imageBuffer;
 
         const predictionResult = await predictClassification(model, imageBuffer, measurements);
 
         await storePredictionData({
             ...value,
             prediction: predictionResult.label,
-            confidence: predictionResult.confidence,
+            confidence: predictionResult.confidenceScore,
             suggestion: predictionResult.suggestion
         });
 
@@ -55,7 +56,7 @@ async function postPredictionsHandler(request, h) {
             data: {
                 ...value,
                 prediction: predictionResult.label,
-                confidence: predictionResult.confidence,
+                confidence: predictionResult.confidenceScore,
                 suggestion: predictionResult.suggestion
             }
         }).code(201);

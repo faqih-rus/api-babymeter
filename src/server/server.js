@@ -1,5 +1,6 @@
 const Hapi = require('@hapi/hapi');
 const routes = require('./routes');
+const authRoutes = require('../auth/authRoutes');
 const loadModel = require('../services/loadModel');
 
 const init = async () => {
@@ -24,7 +25,7 @@ const init = async () => {
     const model = await loadModel();
     server.app.model = model;
 
-    server.route(routes);
+    server.route([...authRoutes, ...routes]);
 
     server.ext('onPreResponse', (request, h) => {
         const { response } = request;

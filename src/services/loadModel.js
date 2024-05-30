@@ -7,7 +7,7 @@ async function loadModel() {
     try {
         const modelPath = path.resolve(__dirname, process.env.MODEL_URL);
         const modelBuffer = fs.readFileSync(modelPath);
-        const model = tflite.loadModel(modelBuffer);
+        const model = await tflite.loadGraphModel(tf.io.fromBuffer(modelBuffer));
 
         console.log('Model loaded successfully');
         return model;
