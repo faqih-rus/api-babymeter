@@ -1,15 +1,8 @@
-const tflite = require('@tensorflow/tfjs-node');
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config();
+const tf = require('@tensorflow/tfjs-node');
 
 async function loadModel() {
     try {
-        const modelPath = path.resolve(__dirname, process.env.MODEL_URL);
-        const modelBuffer = fs.readFileSync(modelPath);
-        const model = await tflite.loadGraphModel(tf.io.fromBuffer(modelBuffer));
-
-        console.log('Model loaded successfully');
+        const model = await tf.loadLayersModel('file://path/to/model.json');
         return model;
     } catch (error) {
         console.error('Error loading model:', error);

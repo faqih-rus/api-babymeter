@@ -2,14 +2,15 @@ const tf = require('@tensorflow/tfjs-node');
 
 async function predictClassification(model, imageBuffer, measurements) {
     try {
-        const imageTensor = tf.node
-            .decodeImage(imageBuffer)
+        
+        const imageTensor = tf.node.decodeImage(imageBuffer, 3)
             .resizeNearestNeighbor([224, 224])
             .toFloat()
             .expandDims();
 
         const normalizedImageTensor = imageTensor.div(255.0);
 
+        
         const measurementTensor = tf.tensor2d([[
             measurements.headCircumference,
             measurements.armCircumference,
@@ -18,12 +19,15 @@ async function predictClassification(model, imageBuffer, measurements) {
             measurements.height
         ]]);
 
-        const combinedTensor = tf.concat([normalizedImageTensor.flatten(), measurementTensor], 1);
+       
+        const flattenedImageTensor = normalizedImageTensor.reshape([1, 224 * 224 * 3]);
+        const combinedTensor = tf.concat([flattenedImageTensor, measurementTensor], 1);
 
         const prediction = model.predict(combinedTensor);
         const score = await prediction.data();
         const confidenceScore = Math.max(...score) * 100;
 
+      
         const classes = [
             'Sehat',
             'Stunting Stadium 1',

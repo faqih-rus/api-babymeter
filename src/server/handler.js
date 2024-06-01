@@ -4,11 +4,17 @@ const { predictClassification } = require('../services/inferenceService');
 const storePredictionData = require('../services/storeData');
 const loadModel = require('../services/loadModel');
 const firebase = require('firebase');
+const firestore = firebase.firestore();
 
 let model;
 
+// Memuat model saat aplikasi mulai
 (async () => {
-    model = await loadModel();
+    try {
+        model = await loadModel();
+    } catch (error) {
+        console.error('Error loading model:', error);
+    }
 })();
 
 async function postPredictionsHandler(request, h) {
@@ -24,7 +30,7 @@ async function postPredictionsHandler(request, h) {
             armCircumference: Joi.number().positive().required(),
             abdomenCircumference: Joi.number().positive().required(),
             chestCircumference: Joi.number().positive().required(),
-            imageBuffer: Joi.binary().required()
+            imageBuffer: Joi.any().meta({ swaggerType: 'file' }).required()
         });
 
         const { error, value } = schema.validate(data);
@@ -40,7 +46,7 @@ async function postPredictionsHandler(request, h) {
             height: value.height
         };
 
-        const imageBuffer = value.imageBuffer;
+        const imageBuffer = value.imageBuffer._data; // Mendapatkan buffer data dari file upload
 
         const predictionResult = await predictClassification(model, imageBuffer, measurements);
 
@@ -76,4 +82,22 @@ async function postPredictionsHandler(request, h) {
     }
 }
 
-module.exports = { postPredictionsHandler };
+async function getPredictionsHandler(request, h) {
+    try {
+        const predictionsSnapshot = await firestore.collection('predictions').get();
+        const predictions = predictionsSnapshot.docs.map(doc => doc.data());
+
+        return h.response({
+            status: 'success',
+            data: predictions
+        }).code(200);
+    } catch (error) {
+        console.error('Error fetching predictions:', error);
+        return h.response({
+            status: 'error',
+            message: 'Internal Server Error'
+        }).code(500);
+    }
+}
+
+module.exports = { postPredictionsHandler, getPredictionsHandler };

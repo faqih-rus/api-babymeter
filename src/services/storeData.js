@@ -1,27 +1,14 @@
-const { database } = require('../config/firebaseConfig');
+const { db } = require('../config/firebaseConfig.js');
 
-async function storePredictionData(data) {
+async function storeData(id, data) {
     try {
-        const newPredictionRef = database.ref('predictions').push();
-        await newPredictionRef.set({
-            name: data.name,
-            age: data.age,
-            weight: data.weight,
-            height: data.height,
-            headCircumference: data.headCircumference,
-            armCircumference: data.armCircumference,
-            abdomenCircumference: data.abdomenCircumference,
-            chestCircumference: data.chestCircumference,
-            prediction: data.prediction,
-            confidence: data.confidence,
-            suggestion: data.suggestion,
-            createdAt: new Date().toISOString()
-        });
-        console.log('Prediction data stored successfully');
+        const predictCollection = db.collection('predictions');
+        await predictCollection.doc(id).set(data);
+        return { status: 'success', message: 'Data stored successfully' };
     } catch (error) {
-        console.error('Error storing prediction data:', error);
-        throw error;
+        console.error('Error storing data:', error);
+        throw new Error('Failed to store data');
     }
 }
 
-module.exports = storePredictionData;
+module.exports = { storeData };

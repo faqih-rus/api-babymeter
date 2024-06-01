@@ -6,8 +6,8 @@ const loadModel = require('../services/loadModel');
 const init = async () => {
     const port = process.env.PORT || 3000;  
     const server = Hapi.server({
-        port: 3000,
-        host: port,
+        port: port,
+        host: 'localhost',
         routes: {
             cors: {
                 origin: ['*'],
@@ -22,26 +22,35 @@ const init = async () => {
         }
     });
 
-    const model = await loadModel();
-    server.app.model = model;
+    // Memuat model dan menyimpannya dalam server.app agar dapat diakses oleh handler
+    try {
+        const model = await loadModel();
+        server.app.model = model;
+    } catch (error) {
+        console.error('Error loading model:', error);
+        process.exit(1);
+    }
 
+    // Menyusun rute termasuk rute autentikasi
     server.route([...authRoutes, ...routes]);
 
+    // Ekstensi onPreResponse untuk logging kesalahan
     server.ext('onPreResponse', (request, h) => {
         const { response } = request;
-
         if (response instanceof Error) {
-            console.log(response);
+            console.error('Response Error:', response);
         }
         return h.continue;
     });
 
+    // Memulai server
     await server.start();
     console.log(`Server running on ${server.info.uri}`);
 };
 
+// Menangani penolakan tidak tertangani
 process.on('unhandledRejection', (err) => {
-    console.error(err);
+    console.error('Unhandled Rejection:', err);
     process.exit(1);
 });
 
