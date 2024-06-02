@@ -1,9 +1,9 @@
-const { db } = require('../config/firebaseConfig.js');
+const { db } = require('../config/firebaseConfig');
 
-async function storeData(id, data) {
+async function storeData(data) {
     try {
         const predictCollection = db.collection('predictions');
-        await predictCollection.doc(id).set(data);
+        await predictCollection.add(data);
         return { status: 'success', message: 'Data stored successfully' };
     } catch (error) {
         console.error('Error storing data:', error);

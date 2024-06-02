@@ -2,9 +2,10 @@ const Hapi = require('@hapi/hapi');
 const routes = require('./routes');
 const authRoutes = require('../auth/authRoutes');
 const loadModel = require('../services/loadModel');
+const { db } = require('../config/firebaseConfig');
 
 const init = async () => {
-    const port = process.env.PORT || 3000;  
+    const port = process.env.PORT || 3000;
     const server = Hapi.server({
         port: port,
         host: 'localhost',

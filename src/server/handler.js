@@ -1,10 +1,9 @@
 const { ClientError } = require('../exceptions/ClientError');
 const Joi = require('joi');
 const { predictClassification } = require('../services/inferenceService');
-const storePredictionData = require('../services/storeData');
+const { storeData } = require('../services/storeData');
 const loadModel = require('../services/loadModel');
-const firebase = require('firebase');
-const firestore = firebase.firestore();
+const { db } = require('../config/firebaseConfig');
 
 let model;
 
@@ -50,21 +49,19 @@ async function postPredictionsHandler(request, h) {
 
         const predictionResult = await predictClassification(model, imageBuffer, measurements);
 
-        await storePredictionData({
+        const predictionData = {
             ...value,
             prediction: predictionResult.label,
             confidence: predictionResult.confidenceScore,
-            suggestion: predictionResult.suggestion
-        });
+            suggestion: predictionResult.suggestion,
+            createdAt: new Date().toISOString()
+        };
+
+        await storeData(predictionData);
 
         return h.response({
             status: 'success',
-            data: {
-                ...value,
-                prediction: predictionResult.label,
-                confidence: predictionResult.confidenceScore,
-                suggestion: predictionResult.suggestion
-            }
+            data: predictionData
         }).code(201);
     } catch (error) {
         if (error instanceof ClientError) {
@@ -84,7 +81,7 @@ async function postPredictionsHandler(request, h) {
 
 async function getPredictionsHandler(request, h) {
     try {
-        const predictionsSnapshot = await firestore.collection('predictions').get();
+        const predictionsSnapshot = await db.collection('predictions').get();
         const predictions = predictionsSnapshot.docs.map(doc => doc.data());
 
         return h.response({

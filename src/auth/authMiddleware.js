@@ -1,4 +1,4 @@
-const firebase = require('firebase');
+const { auth } = require('../config/firebaseConfig');
 
 async function authenticate(request, h) {
     const authorization = request.headers.authorization;
@@ -8,7 +8,7 @@ async function authenticate(request, h) {
 
     const token = authorization.replace('Bearer ', '');
     try {
-        const decodedToken = await firebase.auth().verifyIdToken(token);
+        const decodedToken = await auth.verifyIdToken(token);
         request.auth = {
             credentials: decodedToken,
             isAuthenticated: true

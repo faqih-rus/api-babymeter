@@ -1,8 +1,6 @@
 const firebase = require('firebase/app');
 require('firebase/auth');
 require('firebase/firestore');
-require('firebase/database');
-require('firebase/storage');
 require('dotenv').config();
 
 const firebaseConfig = {
@@ -21,7 +19,5 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const database = firebase.database();
-const storage = firebase.storage();
 
-module.exports = { auth, db, database, storage };
+module.exports = { auth, db };

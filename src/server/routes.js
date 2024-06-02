@@ -1,7 +1,6 @@
-const { 
+const {
     getPredictionsHandler,
-    postPredictionsHandler, 
-    editPredictionsHandler
+    postPredictionsHandler,
 } = require('./handler');
 
 const routes = [
@@ -10,7 +9,7 @@ const routes = [
         path: '/baby',
         handler: postPredictionsHandler,
         options: {
-            payload : {
+            payload: {
                 allow: 'multipart/form-data',
                 parse: true,
                 output: 'data',
@@ -22,12 +21,7 @@ const routes = [
         method: 'GET',
         path: '/baby',
         handler: getPredictionsHandler
-    },
-    {
-        method: 'PUT',
-        path: '/baby',
-        handler: editPredictionsHandler
     }
-]
+];
 
 module.exports = routes;

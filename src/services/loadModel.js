@@ -1,8 +1,11 @@
 const tf = require('@tensorflow/tfjs-node');
+const path = require('path');
+require('dotenv').config();
 
 async function loadModel() {
     try {
-        const model = await tf.loadLayersModel('file://path/to/model.json');
+        const modelPath = path.resolve(__dirname, process.env.MODEL_URL);
+        const model = await tf.loadLayersModel(`file://${modelPath}`);
         return model;
     } catch (error) {
         console.error('Error loading model:', error);
