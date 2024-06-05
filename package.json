@@ -12,8 +12,10 @@
     "@google-cloud/firestore": "^7.7.0",
     "@hapi/hapi": "^21.3.9",
     "@tensorflow/tfjs-node": "^4.14.0",
+    "axios": "^1.7.2",
     "dotenv": "^16.4.5",
-    "firebase": "^10.12.1",
+    "firebase": "^10.12.2",
+    "firebase-admin": "^12.1.1",
     "joi": "^17.13.1",
     "openai": "^4.47.2"
   }
