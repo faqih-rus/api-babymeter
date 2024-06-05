@@ -1,6 +1,6 @@
 # 🍼 BabyMeter 👶
 
-![BabyMeter Logo](https://example.com/babymeter_logo.png)
+![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Cuplikan%20layar%202024-06-05%20110602.png)
 
 BabyMeter adalah aplikasi yang digunakan untuk memonitor pertumbuhan dan kesehatan bayi dengan memanfaatkan Firebase Authentication untuk autentikasi, Firestore untuk penyimpanan data prediksi, dan Hapi.js sebagai framework backend. 🚀
 
