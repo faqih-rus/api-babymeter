@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server/server.js"
+    "start": "node src/server.js"
   },
   "author": "",
   "license": "ISC",
@@ -11,11 +11,15 @@
   "dependencies": {
     "@google-cloud/firestore": "^7.7.0",
     "@hapi/hapi": "^21.3.9",
+    "@hapi/inert": "^7.1.0",
+    "@hapi/vision": "^7.0.3",
     "@tensorflow/tfjs-node": "^4.14.0",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "firebase": "^10.12.2",
     "firebase-admin": "^12.1.1",
+    "hapi-auth-jwt2": "^10.6.0",
+    "hapi-cors-headers": "^1.0.3",
     "joi": "^17.13.1",
     "openai": "^4.47.2"
   }

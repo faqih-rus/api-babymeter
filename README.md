@@ -17,7 +17,7 @@ BabyMeter adalah aplikasi yang digunakan untuk memonitor pertumbuhan dan kesehat
 ## 📂 Struktur Folder
 
 ```
-project-root/
+src
 ├── config/
 │   ├── firebaseConfig.js
 ├── controllers/

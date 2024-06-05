@@ -1,4 +1,6 @@
+// src/middleware/authMiddleware.js
 const admin = require('firebase-admin');
+const Boom = require('@hapi/boom');
 
 module.exports = {
     name: 'authMiddleware',
@@ -8,6 +10,7 @@ module.exports = {
             authenticate: async (request, h) => {
                 const authorization = request.headers.authorization;
                 if (!authorization) {
+                    console.error('Missing authentication header');
                     throw Boom.unauthorized('Missing authentication');
                 }
 
@@ -16,6 +19,7 @@ module.exports = {
                     const decodedToken = await admin.auth().verifyIdToken(token);
                     return h.authenticated({ credentials: decodedToken });
                 } catch (error) {
+                    console.error('Invalid token:', error);
                     throw Boom.unauthorized('Invalid token');
                 }
             }

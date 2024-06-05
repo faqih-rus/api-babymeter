@@ -1,8 +1,9 @@
+// src/controllers/nurseController.js
 const { savePrediction, getPredictions, updatePrediction, updateProfile } = require('../services/nurseService');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 
-exports.createPrediction = async (request, h) => {
+const createPrediction = async (request, h) => {
     try {
         const { imageUrl, name, age } = request.payload;
         const response = await axios.post('<FLASK_INFERENCE_URL>', { imageUrl });
@@ -25,47 +26,54 @@ exports.createPrediction = async (request, h) => {
         };
 
         await savePrediction(userId, prediction);
-
-        return h.response({
-            status: "success",
-            message: "Prediction created",
-            data: prediction
-        }).code(201);
+        return h.response({ status: 'success', data: prediction }).code(201);
     } catch (error) {
-        return h.response({ error: error.message }).code(400);
+        console.error('Error creating prediction:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
 
-exports.getPredictionData = async (request, h) => {
+const getPredictionData = async (request, h) => {
     try {
         const userId = request.auth.credentials.uid;
         const predictions = await getPredictions(userId);
-        return h.response(predictions).code(200);
+        return h.response({ status: 'success', data: predictions }).code(200);
     } catch (error) {
-        return h.response({ error: error.message }).code(400);
+        console.error('Error fetching predictions:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
 
-exports.modifyPrediction = async (request, h) => {
+const modifyPrediction = async (request, h) => {
     try {
         const { id } = request.params;
-        const updates = request.payload;
+        const updateData = request.payload;
         const userId = request.auth.credentials.uid;
-        updates.updatedAt = new Date().toISOString();
-        await updatePrediction(userId, id, updates);
-        return h.response({ message: "Prediction updated successfully" }).code(200);
+
+        const updatedPrediction = await updatePrediction(userId, id, updateData);
+        return h.response({ status: 'success', data: updatedPrediction }).code(200);
     } catch (error) {
-        return h.response({ error: error.message }).code(400);
+        console.error('Error updating prediction:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
 
-exports.updateNurseProfile = async (request, h) => {
+const updateNurseProfile = async (request, h) => {
     try {
         const userId = request.auth.credentials.uid;
-        const profileData = request.payload;
-        await updateProfile(userId, profileData);
-        return h.response({ message: "Profile updated successfully" }).code(200);
+        const updateData = request.payload;
+
+        const updatedProfile = await updateProfile(userId, updateData);
+        return h.response({ status: 'success', data: updatedProfile }).code(200);
     } catch (error) {
-        return h.response({ error: error.message }).code(400);
+        console.error('Error updating profile:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
+};
+
+module.exports = {
+    createPrediction,
+    getPredictionData,
+    modifyPrediction,
+    updateNurseProfile
 };

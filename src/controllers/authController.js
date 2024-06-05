@@ -1,7 +1,7 @@
 // src/controllers/authController.js
 const admin = require('firebase-admin');
 
-exports.register = async (request, h) => {
+const register = async (request, h) => {
     const { token } = request.payload;
 
     try {
@@ -28,7 +28,7 @@ exports.register = async (request, h) => {
     }
 };
 
-exports.login = async (request, h) => {
+const login = async (request, h) => {
     const { email, password } = request.payload;
 
     try {
@@ -40,3 +40,5 @@ exports.login = async (request, h) => {
         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
+
+module.exports = { register, login };

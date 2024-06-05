@@ -1,3 +1,4 @@
+// src/routes/nurseRoutes.js
 const Joi = require('joi');
 const {
     createPrediction,

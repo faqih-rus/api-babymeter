@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/utils/validators.js
+const Joi = require('joi'); 
 
 const registerSchema = Joi.object({
     token: Joi.string().required()
@@ -12,7 +13,15 @@ const loginSchema = Joi.object({
 const createPredictionSchema = Joi.object({
     imageUrl: Joi.string().required(),
     name: Joi.string().required(),
-    age: Joi.number().integer().required()
+    age: Joi.number().integer().required(),
+    headCircumference: Joi.number().required(),
+    armCircumference: Joi.number().required(),
+    abdomenCircumference: Joi.number().required(),
+    chestCircumference: Joi.number().required(),
+    height: Joi.number().required(),
+    weight: Joi.number().min(0).required(), // Allow for decimals in weight
+    id: Joi.string().required(),
+    babyName: Joi.string().required()
 });
 
 const updatePredictionSchema = Joi.object({
@@ -33,7 +42,7 @@ const updateProfileSchema = Joi.object({
     picture: Joi.string().optional()
 });
 
-module.exports = {
+module.exports = { 
     registerSchema,
     loginSchema,
     createPredictionSchema,
