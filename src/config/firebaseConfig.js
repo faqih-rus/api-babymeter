@@ -4,9 +4,10 @@ const serviceAccount = require('./capstone-babymeter-firebase-adminsdk-f1kgg-1bf
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://capstone-babymeter-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    databaseURL: "https://capstone-babymeter-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
 const db = admin.firestore();
 
 module.exports = { db };
+

@@ -19,7 +19,6 @@
     "firebase": "^10.12.2",
     "firebase-admin": "^12.1.1",
     "hapi-auth-jwt2": "^10.6.0",
-    "hapi-cors-headers": "^1.0.3",
     "joi": "^17.13.1",
     "openai": "^4.47.2"
   }
