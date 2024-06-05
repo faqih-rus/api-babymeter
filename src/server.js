@@ -1,14 +1,15 @@
+// src/server.js
 'use strict';
-
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const firebaseAdmin = require('firebase-admin');
-const serviceAccount = require('./config/firebaseConfig');
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 const errorHandler = require('./utils/errorHandler');
+const corsHeaders = require('hapi-cors-headers');
 
 firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(serviceAccount),
-    databaseURL: "https://capstone-babymeter-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    databaseURL: process.env.FIREBASE_DATABASE_URL
 });
 
 const init = async () => {
@@ -21,12 +22,25 @@ const init = async () => {
     await server.register(require('@hapi/vision'));
     await server.register(require('hapi-auth-jwt2'));
 
+    // Configure CORS
+    server.ext('onPreResponse', corsHeaders);
+
     // Configure JWT authentication
     server.auth.strategy('jwt', 'jwt', {
         key: process.env.JWT_SECRET, // Use your own secret key here
         validate: async (decoded, request, h) => {
             // Perform your validation logic here
-            return { isValid: true };
+            try {
+                const firebaseUser = await firebaseAdmin.auth().getUser(decoded.uid);
+                if (firebaseUser) {
+                    return { isValid: true, credentials: { uid: decoded.uid } };
+                } else {
+                    return { isValid: false };
+                }
+            } catch (error) {
+                console.error('Error validating token:', error);
+                return { isValid: false };
+            }
         },
         verifyOptions: {
             algorithms: ['HS256']

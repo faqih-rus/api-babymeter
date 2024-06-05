@@ -1,3 +1,4 @@
+// src/controllers/authController.js
 const admin = require('firebase-admin');
 
 exports.register = async (request, h) => {
