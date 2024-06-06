@@ -10,9 +10,9 @@ module.exports = [
             auth: false,
             validate: {
                 payload: Joi.object({
-                    token: Joi.string().required()
+                  token: Joi.string().required()
                 })
-            }
+              }
         },
         handler: register
     },
