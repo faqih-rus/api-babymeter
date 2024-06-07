@@ -1,4 +1,4 @@
-// src/middleware/authMiddleware.js
+// authMiddleware.js
 const admin = require('firebase-admin');
 const Boom = require('@hapi/boom');
 

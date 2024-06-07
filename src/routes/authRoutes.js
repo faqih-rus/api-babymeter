@@ -1,4 +1,4 @@
-// src/routes/authRoutes.js
+// authRoutes.js
 const Joi = require('joi');
 const { register, login } = require('../controllers/authController');
 
@@ -10,9 +10,11 @@ module.exports = [
             auth: false,
             validate: {
                 payload: Joi.object({
-                  token: Joi.string().required()
+                    email: Joi.string().email().required(),
+                    password: Joi.string().min(6).required(),
+                    name: Joi.string().required(),
                 })
-              }
+            }
         },
         handler: register
     },

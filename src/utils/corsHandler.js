@@ -1,3 +1,4 @@
+// corsHandler.js
 module.exports = {
     name: 'corsHandler',
     version: '1.0.0',
@@ -6,9 +7,9 @@ module.exports = {
             const response = request.response.isBoom ? request.response.output : request.response;
             response.headers['access-control-allow-origin'] = '*';
             response.headers['access-control-allow-credentials'] = 'true';
-            response.headers['access-control-allow-headers'] = 'Origin, Content-Type, Accept';
+            response.headers['access-control-allow-headers'] = 'Origin, Content-Type, Accept, Authorization';
             response.headers['access-control-allow-methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
-            
+
             return h.continue;
         });
     }

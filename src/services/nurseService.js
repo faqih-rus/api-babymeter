@@ -1,4 +1,3 @@
-// src/services/nurseService.js
 const { db } = require('../config/firebaseConfig');
 
 const savePrediction = async (userId, prediction) => {
@@ -7,8 +6,8 @@ const savePrediction = async (userId, prediction) => {
         await docRef.set(prediction);
         return docRef.id;
     } catch (error) {
-        console.error("Error saving prediction:", error); // Log the error for debugging
-        throw error; // Re-throw the error to be handled by the calling function
+        console.error("Error saving prediction:", error);
+        throw error;
     }
 };
 

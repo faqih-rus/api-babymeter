@@ -1,4 +1,4 @@
-# 🍼 BabyMeter 👶
+#  BabyMeter 
 
 ![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Cuplikan%20layar%202024-06-05%20110602.png)
 
@@ -20,6 +20,7 @@ BabyMeter adalah aplikasi yang digunakan untuk memonitor pertumbuhan dan kesehat
 src
 ├── config/
 │   ├── firebaseConfig.js
+│   ├── config.js
 ├── controllers/
 │   ├── authController.js
 │   └── nurseController.js
@@ -31,6 +32,7 @@ src
 ├── services/
 │   └── nurseService.js
 ├── utils/
+│   ├── corsHandler.js
 │   ├── errorHandler.js
 │   └── validators.js
 ├── server.js

@@ -1,46 +1,35 @@
+// server.js
 'use strict';
 
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-const firebaseAdmin = require('firebase-admin');
-const fs = require('fs');
-const path = require('path');
+const admin = require('firebase-admin');
 const errorHandler = require('./utils/errorHandler');
 const corsHandler = require('./utils/corsHandler');
 
-// Read the service account key JSON file
-const serviceAccount = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, '../src/config/capstone-babymeter-firebase-adminsdk-f1kgg-1bf92a891c.json'), 'utf8')
-);
-
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
-  databaseURL: "https://capstone-babymeter-default-rtdb.asia-southeast1.firebasedatabase.app"
-});
-
-// Initialize the Firebase Admin SDK
 const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT || 3000,
-    host: 'localhost'
+    host: process.env.HOST || 'localhost'
   });
 
   await server.register([
     require('@hapi/inert'),
     require('@hapi/vision'),
-    require('hapi-auth-jwt2'),
     {
       plugin: corsHandler
     }
   ]);
 
-  // Configure JWT authentication
+  await server.register({
+    plugin: require('hapi-auth-jwt2')
+  });
+
   server.auth.strategy('jwt', 'jwt', {
-    key: process.env.JWT_SECRET, // Use your own secret key here
+    key: process.env.JWT_SECRET,
     validate: async (decoded, request, h) => {
-      // Perform your validation logic here
       try {
-        const firebaseUser = await firebaseAdmin.auth().getUser(decoded.uid);
+        const firebaseUser = await admin.auth().getUser(decoded.uid);
         if (firebaseUser) {
           return { isValid: true, credentials: { uid: decoded.uid } };
         } else {
@@ -58,11 +47,9 @@ const init = async () => {
 
   server.auth.default('jwt');
 
-  // Register routes
   server.route(require('./routes/authRoutes'));
   server.route(require('./routes/nurseRoutes'));
 
-  // Register error handler
   server.ext('onPreResponse', errorHandler);
 
   await server.start();
