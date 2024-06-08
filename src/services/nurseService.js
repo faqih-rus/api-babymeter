@@ -1,19 +1,20 @@
+const { doc, setDoc, collection, addDoc, getDocs, updateDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
 
-const savePrediction = async (userId, prediction) => {
+const savePrediction = async (userId, predictionData) => {
     try {
-        const docRef = db.collection('predictions').doc(userId).collection('data').doc(prediction.id);
-        await docRef.set(prediction);
-        return docRef.id;
+        const userPredictionsCollection = collection(db, "predictions", userId, "data");
+        await addDoc(userPredictionsCollection, predictionData);
     } catch (error) {
-        console.error("Error saving prediction:", error);
+        console.error('Error saving prediction:', error);
         throw error;
     }
 };
 
 const getPredictions = async (userId) => {
     try {
-        const snapshot = await db.collection('predictions').doc(userId).collection('data').get();
+        const userPredictionsCollection = collection(db, "predictions", userId, "data");
+        const snapshot = await getDocs(userPredictionsCollection);
         const predictions = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -27,8 +28,8 @@ const getPredictions = async (userId) => {
 
 const updatePrediction = async (userId, predictionId, updates) => {
     try {
-        const docRef = db.collection('predictions').doc(userId).collection('data').doc(predictionId);
-        await docRef.update(updates);
+        const docRef = doc(db, "predictions", userId, "data", predictionId);
+        await updateDoc(docRef, updates);
     } catch (error) {
         console.error("Error updating prediction:", error);
         throw error;
@@ -37,8 +38,8 @@ const updatePrediction = async (userId, predictionId, updates) => {
 
 const updateProfile = async (userId, profileData) => {
     try {
-        const docRef = db.collection('profiles').doc(userId);
-        await docRef.update(profileData);
+        const docRef = doc(db, "profiles", userId);
+        await updateDoc(docRef, profileData);
     } catch (error) {
         console.error("Error updating profile:", error);
         throw error;

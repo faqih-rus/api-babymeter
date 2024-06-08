@@ -1,6 +1,5 @@
-// authRoutes.js
 const Joi = require('joi');
-const { register, login } = require('../controllers/authController');
+const { register, login, logout } = require('../controllers/authController');
 
 module.exports = [
     {
@@ -31,5 +30,18 @@ module.exports = [
             }
         },
         handler: login
+    },
+    {
+        method: 'POST',
+        path: '/auth/logout',
+        options: {
+            auth: false,
+            validate: {
+                headers: Joi.object({
+                    authorization: Joi.string().required()
+                }).unknown()
+            }
+        },
+        handler: logout
     }
 ];

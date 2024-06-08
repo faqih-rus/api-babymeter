@@ -2,35 +2,119 @@ const { savePrediction, getPredictions, updatePrediction, updateProfile } = requ
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 
+// const createPrediction = async (request, h) => {
+//     try {
+//         const { imageUrl, babyName, age, weight, id } = request.payload;
+//         const response = await axios.post('URL_MLNYA', { imageUrl });
+
+//         if (response.status !== 200) {
+//             throw new Error('Failed to get prediction from ML model');
+//         }
+
+//         const { lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan } = response.data;
+
+//         if (![lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan].every(value => value !== undefined)) {
+//             throw new Error('Incomplete prediction data');
+//         }
+
+//         const panjangBadanMeter = panjang_badan / 100;
+//         const bmi = weight / (panjangBadanMeter * panjangBadanMeter);
+
+//         let prediction = "Normal";
+//         let suggestion = "Pertumbuhan normal.";
+
+//         if (bmi < 14) {
+//             prediction = "Di Bawah Normal";
+//             suggestion = "Konsultasikan dengan dokter anak untuk evaluasi lebih lanjut.";
+//         } else if (bmi > 17) {
+//             prediction = "Di Atas Normal";
+//             suggestion = "Perhatikan asupan makanan dan aktivitas fisik bayi.";
+//         }
+
+//         const predictionData = {
+//             id,
+//             babyName,
+//             age,
+//             weight,
+//             lingkar_kepala,
+//             lingkar_dada,
+//             lingkar_lengan,
+//             lingkar_perut,
+//             lingkar_paha,
+//             panjang_badan,
+//             prediction,
+//             confidence: 0.95,
+//             suggestion,
+//             createdAt: new Date().toISOString(),
+//             updatedAt: new Date().toISOString()
+//         };
+
+//         await savePrediction(request.auth.credentials.uid, predictionData);
+
+//         return h.response({ status: 'success', data: predictionData }).code(201);
+//     } catch (error) {
+//         console.error('Error creating prediction:', error);
+//         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
+//     }
+// };
+
+
 const createPrediction = async (request, h) => {
     try {
-        const { imageUrl, name, age } = request.payload;
-        const response = await axios.post('<FLASK_INFERENCE_URL>', { imageUrl });
-        const predictionData = response.data;
+        const { imageUrl, babyName, age, weight, id } = request.payload;
+        // Hardcode data prediksi
+        const [lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan] = [20, 10, 5, 10, 15, 20];
         const userId = request.auth.credentials.uid;
 
-        const prediction = {
-            id: uuidv4(),
-            name,
-            height: predictionData.height,
-            headCircumference: predictionData.headCircumference,
-            armCircumference: predictionData.armCircumference,
-            abdomenCircumference: predictionData.abdomenCircumference,
-            chestCircumference: predictionData.chestCircumference,
-            prediction: predictionData.prediction,
-            confidence: predictionData.confidence,
-            suggestion: predictionData.suggestion,
+        if (!lingkar_kepala || !lingkar_dada || !lingkar_lengan || !lingkar_perut || !lingkar_paha || !panjang_badan) {
+            throw new Error('Data prediksi tidak lengkap');
+        }
+
+        // Konversi panjang_badan dari cm ke meter
+        const panjangBadanMeter = panjang_badan / 100;
+
+        // Hitung BMI
+        const bmi = weight / (panjangBadanMeter * panjangBadanMeter);
+
+        // Menentukan status pertumbuhan dan saran berdasarkan nilai BMI
+        let prediction = "Normal";
+        let suggestion = "Pertumbuhan normal.";
+
+        if (bmi < 14) {
+            prediction = "Di Bawah Normal";
+            suggestion = "Konsultasikan dengan dokter anak untuk evaluasi lebih lanjut.";
+        } else if (bmi > 17) {
+            prediction = "Di Atas Normal";
+            suggestion = "Perhatikan asupan makanan dan aktivitas fisik bayi.";
+        }
+
+        const predictionData = {
+            id: id,
+            babyName: babyName,
+            age: age,
+            weight: weight,
+            lingkar_kepala: lingkar_kepala,
+            lingkar_dada: lingkar_dada,
+            lingkar_lengan: lingkar_lengan,
+            lingkar_perut: lingkar_perut,
+            lingkar_paha: lingkar_paha,
+            panjang_badan: panjang_badan,
+            prediction: prediction,
+            confidence: 0.95,
+
+            suggestion: suggestion,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
-        await savePrediction(userId, prediction);
-        return h.response({ status: 'success', data: prediction }).code(201);
+        await savePrediction(userId, predictionData);
+        return h.response({ status: 'success', data: predictionData }).code(201);
     } catch (error) {
         console.error('Error creating prediction:', error);
         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
+
 
 const getPredictionData = async (request, h) => {
     try {

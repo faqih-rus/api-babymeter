@@ -13,45 +13,28 @@ const init = async () => {
     host: process.env.HOST || 'localhost'
   });
 
+  // Register plugins for serving static files and views
   await server.register([
     require('@hapi/inert'),
     require('@hapi/vision'),
-    {
-      plugin: corsHandler
-    }
   ]);
 
+  // Register CORS handler plugin
   await server.register({
-    plugin: require('hapi-auth-jwt2')
+    plugin: corsHandler
   });
 
-  server.auth.strategy('jwt', 'jwt', {
-    key: process.env.JWT_SECRET,
-    validate: async (decoded, request, h) => {
-      try {
-        const firebaseUser = await admin.auth().getUser(decoded.uid);
-        if (firebaseUser) {
-          return { isValid: true, credentials: { uid: decoded.uid } };
-        } else {
-          return { isValid: false };
-        }
-      } catch (error) {
-        console.error('Error validating token:', error);
-        return { isValid: false };
-      }
-    },
-    verifyOptions: {
-      algorithms: ['HS256']
-    }
-  });
+  // Register custom Firebase authentication middleware
+  await server.register(require('./middleware/authMiddleware.js'));
 
-  server.auth.default('jwt');
-
+  // Register routes
   server.route(require('./routes/authRoutes'));
   server.route(require('./routes/nurseRoutes'));
 
+  // Add error handling extension
   server.ext('onPreResponse', errorHandler);
 
+  // Start the server
   await server.start();
   console.log(`Server running on %s`, server.info.uri);
 };

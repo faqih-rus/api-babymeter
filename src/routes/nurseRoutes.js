@@ -13,9 +13,11 @@ module.exports = [
         options: {
             validate: {
                 payload: Joi.object({
-                    imageUrl: Joi.string().required(),
-                    name: Joi.string().required(),
-                    age: Joi.number().integer().required()
+                    imageUrl: Joi.string().uri().required(),
+                    babyName: Joi.string().required(),
+                    age: Joi.number().integer().required(),
+                    weight: Joi.number().required(),
+                    id: Joi.string().required()
                 })
             }
         },
@@ -35,12 +37,15 @@ module.exports = [
                     id: Joi.string().required()
                 }),
                 payload: Joi.object({
-                    name: Joi.string().optional(),
-                    height: Joi.number().optional(),
-                    headCircumference: Joi.number().optional(),
-                    armCircumference: Joi.number().optional(),
-                    abdomenCircumference: Joi.number().optional(),
-                    chestCircumference: Joi.number().optional(),
+                    babyName: Joi.string().optional(),
+                    age: Joi.number().integer().optional(),
+                    weight: Joi.number().optional(),
+                    lingkar_kepala: Joi.number().optional(),
+                    lingkar_dada: Joi.number().optional(),
+                    lingkar_lengan: Joi.number().optional(),
+                    lingkar_perut: Joi.number().optional(),
+                    lingkar_paha: Joi.number().optional(),
+                    panjang_badan: Joi.number().optional(),
                     prediction: Joi.string().optional(),
                     confidence: Joi.number().optional(),
                     suggestion: Joi.string().optional()

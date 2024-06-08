@@ -41,90 +41,192 @@ src
 └── README.md
 ```
 
-## 🚀 Instalasi dan Konfigurasi
+# BabyMeter API Documentation
 
-1. **Clone Repository**
-   ```bash
-   git clone https://github.com/yourusername/babymeter.git
-   cd babymeter
-   ```
+BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan memprediksi pertumbuhan bayi. API ini memungkinkan pengguna untuk mendaftar, masuk, membuat prediksi pertumbuhan bayi, dan mengelola profil mereka.
 
-2. **Instal Dependencies**
-   ```bash
-   npm install
-   ```
+## Endpoints
 
-3. **Konfigurasi Firebase**
-   - Tambahkan file kredensial Firebase Anda di `config/capstone-babymeter-firebase-adminsdk.json`.
+### Authentication
 
-4. **Buat File .env**
-   - Buat file `.env` di root proyek dan tambahkan konfigurasi berikut:
-     ```env
-     PORT=3000
-     JWT_SECRET=your_jwt_secret
+1. **Register User**
+   - **URL**: `/api/register`
+   - **Method**: `POST`
+   - **Description**: Mendaftarkan pengguna baru.
+   - **Request Payload**:
+     ```json
+     {
+       "email": "string",
+       "password": "string",
+       "name": "string"
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "status": 201,
+       "message": "Registration successful!"
+     }
      ```
 
-5. **Jalankan Server**
-   ```bash
-   node server.js
-   ```
+2. **Login User**
+   - **URL**: `/api/login`
+   - **Method**: `POST`
+   - **Description**: Login pengguna.
+   - **Request Payload**:
+     ```json
+     {
+       "email": "string",
+       "password": "string"
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "status": 200,
+       "message": "Login successful",
+       "idToken": "string"
+     }
+     ```
 
-## 🎯 Penggunaan API
+3. **Logout User**
+   - **URL**: `/api/logout`
+   - **Method**: `POST`
+   - **Description**: Logout pengguna.
+   - **Response**:
+     ```json
+     {
+       "status": 200,
+       "message": "Logout successful."
+     }
+     ```
 
-### Autentikasi
+### Predictions
 
-- **Register**: `POST /auth/register`
-  - Body:
-    ```json
-    {
-      "token": "your_firebase_token"
-    }
-    ```
+1. **Create Prediction**
+   - **URL**: `/api/predictions`
+   - **Method**: `POST`
+   - **Description**: Membuat prediksi baru.
+   - **Request Payload**:
+     ```json
+     {
+       "userId": "string",
+       "predictionData": {
+         "age": "number",
+         "babyName": "string",
+         "confidence": "number",
+         "createdAt": "string",
+         "id": "string",
+         "lingkar_dada": "number",
+         "lingkar_kepala": "number",
+         "lingkar_lengan": "number",
+         "lingkar_paha": "number",
+         "lingkar_perut": "number",
+         "panjang_badan": "number",
+         "prediction": "string",
+         "suggestion": "string",
+         "updatedAt": "string",
+         "weight": "number"
+       }
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "status": "success",
+       "message": "Prediction saved successfully"
+     }
+     ```
 
-- **Login**: `POST /auth/login`
-  - Body:
-    ```json
-    {
-      "email": "your_email",
-      "password": "your_password"
-    }
-    ```
+2. **Get Predictions**
+   - **URL**: `/api/predictions/{userId}`
+   - **Method**: `GET`
+   - **Description**: Mengambil semua prediksi untuk pengguna tertentu.
+   - **Response**:
+     ```json
+     [
+       {
+         "id": "string",
+         "age": "number",
+         "babyName": "string",
+         "confidence": "number",
+         "createdAt": "string",
+         "lingkar_dada": "number",
+         "lingkar_kepala": "number",
+         "lingkar_lengan": "number",
+         "lingkar_paha": "number",
+         "lingkar_perut": "number",
+         "panjang_badan": "number",
+         "prediction": "string",
+         "suggestion": "string",
+         "updatedAt": "string",
+         "weight": "number"
+       }
+     ]
+     ```
 
-### Prediksi
+3. **Update Prediction**
+   - **URL**: `/api/predictions/{userId}/{predictionId}`
+   - **Method**: `PUT`
+   - **Description**: Memperbarui prediksi tertentu.
+   - **Request Payload**:
+     ```json
+     {
+       "updates": {
+         "fieldToUpdate": "newValue"
+       }
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "status": "success",
+       "message": "Prediction updated successfully"
+     }
+     ```
 
-- **Buat Prediksi Baru**: `POST /nurse/predictions`
-  - Body:
-    ```json
-    {
-      "imageUrl": "url_gambar",
-      "name": "nama_bayi",
-      "age": "umur_bayi"
-    }
-    ```
+### Profile
 
-- **Ambil Semua Prediksi**: `GET /nurse/predictions`
+1. **Update Profile**
+   - **URL**: `/api/profiles/{userId}`
+   - **Method**: `PUT`
+   - **Description**: Memperbarui profil pengguna.
+   - **Request Payload**:
+     ```json
+     {
+       "profileData": {
+         "fieldToUpdate": "newValue"
+       }
+     }
+     ```
+   - **Response**:
+     ```json
+     {
+       "status": "success",
+       "message": "Profile updated successfully"
+     }
+     ```
 
-- **Edit Prediksi**: `PUT /nurse/predictions/{id}`
-  - Body:
-    ```json
-    {
-      "name": "nama_bayi",
-      "height": 75,
-      "weight": 10,
-      ...
-    }
-    ```
+## Contoh Payload untuk Update Prediction
 
-### Profil Perawat
-
-- **Perbarui Profil Perawat**: `PUT /nurse/profile`
-  - Body:
-    ```json
-    {
-      "name": "nama_perawat",
-      "email": "email_perawat",
-      "picture": "url_foto"
-    }
-    ```
-
-Selamat menggunakan BabyMeter! 🎉👶✨
+```json
+{
+  "updates": {
+    "age": 1,
+    "babyName": "Mishcka",
+    "confidence": 0.95,
+    "createdAt": "2024-06-08T06:06:05.463Z",
+    "id": "317305123456789",
+    "lingkar_dada": 35,
+    "lingkar_kepala": 45,
+    "lingkar_lengan": 15,
+    "lingkar_paha": 20,
+    "lingkar_perut": 25,
+    "panjang_badan": 70,
+    "prediction": "Di Atas Normal",
+    "suggestion": "Perhatikan asupan makanan dan aktivitas fisik bayi.",
+    "updatedAt": "2024-06-08T06:06:05.463Z",
+    "weight": 23
+  }
+}
+```
