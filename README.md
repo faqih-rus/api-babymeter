@@ -50,7 +50,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
 ### Authentication
 
 1. **Register User**
-   - **URL**: `/api/register`
+   - **URL**: `/auth/register`
    - **Method**: `POST`
    - **Description**: Mendaftarkan pengguna baru.
    - **Request Payload**:
@@ -70,7 +70,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      ```
 
 2. **Login User**
-   - **URL**: `/api/login`
+   - **URL**: `/auth/login`
    - **Method**: `POST`
    - **Description**: Login pengguna.
    - **Request Payload**:
@@ -90,7 +90,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      ```
 
 3. **Logout User**
-   - **URL**: `/api/logout`
+   - **URL**: `/auth/logout`
    - **Method**: `POST`
    - **Description**: Logout pengguna.
    - **Response**:
@@ -104,7 +104,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
 ### Predictions
 
 1. **Create Prediction**
-   - **URL**: `/api/predictions`
+   - **URL**: `/nurse/predictions`
    - **Method**: `POST`
    - **Description**: Membuat prediksi baru.
    - **Request Payload**:
@@ -139,7 +139,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      ```
 
 2. **Get Predictions**
-   - **URL**: `/api/predictions/{userId}`
+   - **URL**: `/api/predictions/{id}`
    - **Method**: `GET`
    - **Description**: Mengambil semua prediksi untuk pengguna tertentu.
    - **Response**:
@@ -166,7 +166,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      ```
 
 3. **Update Prediction**
-   - **URL**: `/api/predictions/{userId}/{predictionId}`
+   - **URL**: `/nurse/predictions/{id}`
    - **Method**: `PUT`
    - **Description**: Memperbarui prediksi tertentu.
    - **Request Payload**:
@@ -188,7 +188,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
 ### Profile
 
 1. **Update Profile**
-   - **URL**: `/api/profiles/{userId}`
+   - **URL**: `/nurse/profile/{userId}`
    - **Method**: `PUT`
    - **Description**: Memperbarui profil pengguna.
    - **Request Payload**:
