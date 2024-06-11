@@ -3,7 +3,7 @@
 
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-const admin = require('firebase-admin');
+// const admin = require('firebase-admin');
 const errorHandler = require('./utils/errorHandler');
 const corsHandler = require('./utils/corsHandler');
 

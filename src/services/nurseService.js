@@ -1,10 +1,10 @@
-const { doc, setDoc, collection, addDoc, getDocs, updateDoc } = require("firebase/firestore");
+const { doc, setDoc, collection, getDocs, getDoc, updateDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
 
 const savePrediction = async (userId, predictionData) => {
     try {
-        const userPredictionsCollection = collection(db, "predictions", userId, "data");
-        await addDoc(userPredictionsCollection, predictionData);
+        const userPredictionDoc = doc(db, "predictions", userId, "data", predictionData.id);
+        await setDoc(userPredictionDoc, predictionData);
     } catch (error) {
         console.error('Error saving prediction:', error);
         throw error;
@@ -26,10 +26,28 @@ const getPredictions = async (userId) => {
     }
 };
 
+const getPredictionById = async (userId, predictionId) => {
+    try {
+        const docRef = doc(db, "predictions", userId, "data", predictionId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching prediction by ID:", error);
+        throw error;
+    }
+};
+
 const updatePrediction = async (userId, predictionId, updates) => {
     try {
         const docRef = doc(db, "predictions", userId, "data", predictionId);
         await updateDoc(docRef, updates);
+        
+        const updatedDoc = await getDoc(docRef);
+        return { id: updatedDoc.id, ...updatedDoc.data() };
     } catch (error) {
         console.error("Error updating prediction:", error);
         throw error;
@@ -38,12 +56,21 @@ const updatePrediction = async (userId, predictionId, updates) => {
 
 const updateProfile = async (userId, profileData) => {
     try {
-        const docRef = doc(db, "profiles", userId);
-        await updateDoc(docRef, profileData);
+        
+        const userDocRef = doc(db, "Users", userId);
+        const userDocSnap = await getDoc(userDocRef);
+        if (!userDocSnap.exists()) {
+            throw new Error(`No document found for user: ${userId}`);
+        }
+
+        await updateDoc(userDocRef, profileData);
+
+        const updatedUserDoc = await getDoc(userDocRef);
+        return { id: updatedUserDoc.id, ...updatedUserDoc.data() };
     } catch (error) {
-        console.error("Error updating profile:", error);
+        console.error("Error updating profile in Users collection:", error);
         throw error;
     }
 };
 
-module.exports = { savePrediction, getPredictions, updatePrediction, updateProfile };
+module.exports = { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile };

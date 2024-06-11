@@ -37,18 +37,8 @@ module.exports = [
                     id: Joi.string().required()
                 }),
                 payload: Joi.object({
-                    babyName: Joi.string().optional(),
-                    age: Joi.number().integer().optional(),
-                    weight: Joi.number().optional(),
-                    lingkar_kepala: Joi.number().optional(),
-                    lingkar_dada: Joi.number().optional(),
-                    lingkar_lengan: Joi.number().optional(),
-                    lingkar_perut: Joi.number().optional(),
-                    lingkar_paha: Joi.number().optional(),
-                    panjang_badan: Joi.number().optional(),
-                    prediction: Joi.string().optional(),
-                    confidence: Joi.number().optional(),
-                    suggestion: Joi.string().optional()
+                    id: Joi.string().optional(),
+                    weight: Joi.number().optional()
                 })
             }
         },
@@ -61,8 +51,7 @@ module.exports = [
             validate: {
                 payload: Joi.object({
                     name: Joi.string().optional(),
-                    email: Joi.string().email().optional(),
-                    picture: Joi.string().optional()
+                    password: Joi.string().min(6).optional()
                 })
             }
         },
