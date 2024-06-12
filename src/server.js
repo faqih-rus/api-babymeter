@@ -13,28 +13,21 @@ const init = async () => {
     host: process.env.HOST || 'localhost'
   });
 
-  // Register plugins for serving static files and views
   await server.register([
     require('@hapi/inert'),
     require('@hapi/vision'),
   ]);
 
-  // Register CORS handler plugin
   await server.register({
     plugin: corsHandler
   });
 
-  // Register custom Firebase authentication middleware
   await server.register(require('./middleware/authMiddleware.js'));
 
-  // Register routes
   server.route(require('./routes/authRoutes'));
   server.route(require('./routes/nurseRoutes'));
-
-  // Add error handling extension
   server.ext('onPreResponse', errorHandler);
 
-  // Start the server
   await server.start();
   console.log(`Server running on %s`, server.info.uri);
 };

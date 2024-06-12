@@ -1,5 +1,6 @@
+// authRoutes.js
 const Joi = require('joi');
-const { register, login, logout } = require('../controllers/authController');
+const { register, login, logout, updateProfile } = require('../controllers/authController');
 
 module.exports = [
     {
@@ -43,5 +44,20 @@ module.exports = [
             }
         },
         handler: logout
+    },
+    {
+        method: 'PUT',
+        path: '/auth/updateProfile',
+        options: {
+            auth: 'default',
+            validate: {
+                payload: Joi.object({
+                    name: Joi.string().optional(),
+                    password: Joi.string().min(6).optional(),
+                    profileImage: Joi.string().optional()
+                })
+            }
+        },
+        handler: updateProfile
     }
 ];

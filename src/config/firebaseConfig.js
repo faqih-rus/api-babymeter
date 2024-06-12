@@ -1,6 +1,7 @@
 // firebaseConfig.js
 const { initializeApp } = require('firebase/app');
 const { getFirestore } = require('firebase/firestore');
+const { getStorage } = require("firebase/storage");
 const admin = require('firebase-admin');
 const config = require('./config.js');
 
@@ -10,4 +11,6 @@ admin.initializeApp({
 });
 
 const db = getFirestore(firebaseApp);
-module.exports = { db, firebaseApp };
+const storage = getStorage(firebaseApp);
+
+module.exports = { storage ,db, firebaseApp };

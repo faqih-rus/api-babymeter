@@ -1,9 +1,12 @@
+// nurseRoutes.js
 const Joi = require('joi');
 const {
     createPrediction,
     getPredictionData,
     modifyPrediction,
-    updateNurseProfile
+    updateNurseProfile,
+    getPredictionByIdHandler,
+    deletePredictionHandler
 } = require('../controllers/nurseController');
 
 module.exports = [
@@ -37,6 +40,7 @@ module.exports = [
                     id: Joi.string().required()
                 }),
                 payload: Joi.object({
+                    babyName: Joi.string().optional(),
                     id: Joi.string().optional(),
                     weight: Joi.number().optional()
                 })
@@ -48,13 +52,25 @@ module.exports = [
         method: 'PUT',
         path: '/nurse/profile',
         options: {
+            auth: 'default',
             validate: {
                 payload: Joi.object({
                     name: Joi.string().optional(),
-                    password: Joi.string().min(6).optional()
+                    password: Joi.string().min(6).optional(),
+                    profileImage: Joi.string().optional()
                 })
             }
         },
         handler: updateNurseProfile
+    },
+    {
+        method: 'GET',
+        path: '/nurse/predictions/{id}',
+        handler: getPredictionByIdHandler
+    },
+    {
+        method: 'DELETE',
+        path: '/nurse/predictions/{id}',
+        handler: deletePredictionHandler
     }
 ];

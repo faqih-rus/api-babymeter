@@ -1,4 +1,4 @@
-const { doc, setDoc, collection, getDocs, getDoc, updateDoc } = require("firebase/firestore");
+const { doc, setDoc, collection, getDocs, getDoc, updateDoc, deleteDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
 
 const savePrediction = async (userId, predictionData) => {
@@ -45,11 +45,19 @@ const updatePrediction = async (userId, predictionId, updates) => {
     try {
         const docRef = doc(db, "predictions", userId, "data", predictionId);
         await updateDoc(docRef, updates);
-        
-        const updatedDoc = await getDoc(docRef);
-        return { id: updatedDoc.id, ...updatedDoc.data() };
     } catch (error) {
         console.error("Error updating prediction:", error);
+        throw error;
+    }
+};
+
+
+const deletePrediction = async (userId, predictionId) => {
+    try {
+        const docRef = doc(db, "predictions", userId, "data", predictionId);
+        await deleteDoc(docRef);
+    } catch (error) {
+        console.error("Error deleting prediction:", error);
         throw error;
     }
 };
@@ -73,4 +81,11 @@ const updateProfile = async (userId, profileData) => {
     }
 };
 
-module.exports = { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile };
+module.exports = {
+    savePrediction,
+    getPredictions,
+    getPredictionById,
+    updatePrediction,
+    deletePrediction,
+    updateProfile
+};

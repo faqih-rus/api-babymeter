@@ -1,9 +1,12 @@
+// authController.js
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = require("firebase/auth");
-const { doc, setDoc } = require("firebase/firestore");
+const { doc, setDoc, updateDoc } = require("firebase/firestore");
+const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const firebaseApp = require("../config/firebaseConfig.js");
 const { db } = require("../config/firebaseConfig.js");
-
+const { v4: uuidv4 } = require('uuid');
 const auth = getAuth(firebaseApp.firebaseApp);
+const storage = getStorage(firebaseApp.firebaseApp);
 
 exports.register = async (request, h) => {
   try {
@@ -13,10 +16,10 @@ exports.register = async (request, h) => {
 
     const data = {
       name: name,
+      profileImageUrl: "https://storage.googleapis.com/asset-design/profile-image/Cuplikan%20layar%202024-06-11%20230353.png"
     };
 
     const docRef = doc(db, "Users", user.uid);
-
     await setDoc(docRef, data);
 
     return h.response({
@@ -81,5 +84,33 @@ exports.logout = async (request, h) => {
       status: 500,
       message: "Logout failed. Please try again.",
     }).code(500);
+  }
+};
+
+exports.updateProfile = async (request, h) => {
+  try {
+    const userId = request.auth.credentials.uid;
+    const { name, password, profileImage } = request.payload;
+
+    let updateData = {
+      ...(name && { name }),
+      ...(password && { password })
+    };
+
+    if (profileImage) {
+      const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
+      const snapshot = await uploadBytes(storageRef, Buffer.from(profileImage, 'base64'));
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      updateData.profileImageUrl = downloadURL;
+    }
+
+    const userDocRef = doc(db, "Users", userId);
+    await updateDoc(userDocRef, updateData);
+
+    const updatedUserDoc = await getDoc(userDocRef);
+    return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
   }
 };

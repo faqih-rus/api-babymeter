@@ -37,8 +37,8 @@ const updatePredictionSchema = Joi.object({
 
 const updateProfileSchema = Joi.object({
     name: Joi.string().optional(),
-    email: Joi.string().email().optional(),
-    picture: Joi.string().optional()
+    password: Joi.string().min(6).optional(),
+    profileImageFile: Joi.any().meta({ swaggerType: 'file' }).optional()
 });
 
 module.exports = {

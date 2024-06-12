@@ -1,6 +1,14 @@
-const { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile } = require('../services/nurseService');
+// nurseController.js
+const { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile, deletePrediction } = require('../services/nurseService');
 const axios = require('axios');
+const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
+const { doc, updateDoc, getDoc } = require("firebase/firestore");
+const { db } = require('../config/firebaseConfig');
+const firebaseApp = require('../config/firebaseConfig');
+const storage = getStorage(firebaseApp.firebaseApp);
 const { v4: uuidv4 } = require('uuid');
+const bcrypt = require('bcrypt');
+
 
 // const createPrediction = async (request, h) => {
 //     try {
@@ -166,17 +174,64 @@ const modifyPrediction = async (request, h) => {
 const updateNurseProfile = async (request, h) => {
     try {
         const userId = request.auth.credentials.uid;
-        const { name, password } = request.payload;
+        const { name, password, profileImage } = request.payload;
 
-        const updateData = {
-            ...(name && { name }),       
+        let updateData = {
+            ...(name && { name }),
             ...(password && { password })
         };
 
-        const updatedProfile = await updateProfile(userId, updateData);
-        return h.response({ status: 'success', data: updatedProfile }).code(200);
+        if (profileImage) {
+            const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
+            const snapshot = await uploadBytes(storageRef, Buffer.from(profileImage, 'base64'));
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            updateData.profileImageUrl = downloadURL;
+        }
+
+        const userDocRef = doc(db, "Users", userId);
+        await updateDoc(userDocRef, updateData);
+
+        const updatedUserDoc = await getDoc(userDocRef);
+        return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
     } catch (error) {
         console.error('Error updating profile:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
+    }
+};
+  
+
+const getPredictionByIdHandler = async (request, h) => {
+    try {
+        const { id } = request.params;
+        const userId = request.auth.credentials.uid;
+
+        const prediction = await getPredictionById(userId, id);
+        if (!prediction) {
+            return h.response({ status: 'error', message: 'Prediction not found' }).code(404);
+        }
+
+        return h.response({ status: 'success', data: prediction }).code(200);
+    } catch (error) {
+        console.error('Error fetching prediction by ID:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
+    }
+};
+
+const deletePredictionHandler = async (request, h) => {
+    try {
+        const { id } = request.params;
+        const userId = request.auth.credentials.uid;
+
+        // Cek apakah prediksi dengan ID tersebut ada
+        const prediction = await getPredictionById(userId, id);
+        if (!prediction) {
+            return h.response({ status: 'error', message: 'Prediction not found' }).code(404);
+        }
+
+        await deletePrediction(userId, id);
+        return h.response({ status: 'success', message: 'Prediction deleted successfully' }).code(200);
+    } catch (error) {
+        console.error('Error deleting prediction:', error);
         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
@@ -186,12 +241,8 @@ module.exports = {
     createPrediction,
     getPredictionData,
     modifyPrediction,
-    updateNurseProfile
+    updateNurseProfile,
+    getPredictionByIdHandler,
+    deletePredictionHandler
 };
 
-module.exports = {
-    createPrediction,
-    getPredictionData,
-    modifyPrediction,
-    updateNurseProfile
-};
