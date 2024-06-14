@@ -10,7 +10,12 @@ const corsHandler = require('./utils/corsHandler');
 const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT || 3000,
-    host: process.env.HOST || 'localhost'
+    host: process.env.HOST || '0.0.0.0',
+    routes: {
+      payload: {
+        maxBytes: 10485760 
+      }
+    }
   });
 
   await server.register([
