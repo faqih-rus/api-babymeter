@@ -19,6 +19,8 @@
     "dotenv": "^16.4.5",
     "firebase": "^10.12.2",
     "firebase-admin": "^12.1.1",
+    "form-data": "^4.0.0",
+    "formdata": "^0.10.4",
     "hapi-auth-jwt2": "^10.6.0",
     "joi": "^17.13.1",
     "openai": "^4.47.2"

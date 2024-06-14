@@ -1,6 +1,7 @@
 // nurseController.js
 const { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile, deletePrediction } = require('../services/nurseService');
 const axios = require('axios');
+const FormData = require('form-data');  // Import form-data
 const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const { doc, updateDoc, getDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
@@ -77,17 +78,38 @@ const bcrypt = require('bcrypt');
 const createPrediction = async (request, h) => {
     try {
         const { imageUrl, babyName, age, weight, id } = request.payload;
-        // Hardcode data prediksi
-        const [lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan] = [20, 10, 5, 10, 15, 20];
         const userId = request.auth.credentials.uid;
 
-        if (!lingkar_kepala || !lingkar_dada || !lingkar_lengan || !lingkar_perut || !lingkar_paha || !panjang_badan) {
-            throw new Error('Data prediksi tidak lengkap');
-        }
-
-        const existingPrediction = await getPredictionById(userId,id);
+        const existingPrediction = await getPredictionById(userId, id);
         if (existingPrediction) {
             return h.response({ status: 'error', message: 'Prediction ID already exists' }).code(400);
+        }
+
+        console.log("Sending image to Flask server for processing...");
+
+        // Mendapatkan gambar dari URL dan mengirimkannya ke Flask server
+        const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+
+        const formData = new FormData();
+        formData.append('image', imageBuffer, {
+            filename: 'image.jpg',
+            contentType: 'image/jpeg',
+        });
+
+        const response = await axios.post('http://34.101.242.192:5000/predict', formData, {
+            headers: {
+                ...formData.getHeaders()
+            }
+        });
+
+        console.log("Received response from Flask server.");
+        const mlResult = response.data;
+
+        const { lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan } = mlResult;
+
+        if (!lingkar_kepala || !lingkar_dada || !lingkar_lengan || !lingkar_perut || !lingkar_paha || !panjang_badan) {
+            throw new Error('Incomplete prediction data');
         }
 
         // Konversi panjang_badan dari cm ke meter
@@ -104,7 +126,7 @@ const createPrediction = async (request, h) => {
             prediction = "Di Bawah Normal";
             suggestion = "Konsultasikan dengan dokter anak untuk evaluasi lebih lanjut.";
         } else if (bmi > 17) {
-            prediction = "Di Atas Normal";
+            prediction = "Obesitas";
             suggestion = "Perhatikan asupan makanan dan aktivitas fisik bayi.";
         }
 
@@ -121,7 +143,6 @@ const createPrediction = async (request, h) => {
             panjang_badan: panjang_badan,
             prediction: prediction,
             confidence: 0.95,
-
             suggestion: suggestion,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
@@ -134,6 +155,8 @@ const createPrediction = async (request, h) => {
         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
+
+
 
 const getPredictionData = async (request, h) => {
     try {
@@ -222,7 +245,7 @@ const deletePredictionHandler = async (request, h) => {
         const { id } = request.params;
         const userId = request.auth.credentials.uid;
 
-        // Cek apakah prediksi dengan ID tersebut ada
+        // Cek prediksi dengan ID
         const prediction = await getPredictionById(userId, id);
         if (!prediction) {
             return h.response({ status: 'error', message: 'Prediction not found' }).code(404);
