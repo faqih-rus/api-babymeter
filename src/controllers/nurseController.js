@@ -1,4 +1,3 @@
-// nurseController.js
 const { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile, deletePrediction } = require('../services/nurseService');
 const axios = require('axios');
 const FormData = require('form-data');
@@ -6,13 +5,15 @@ const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/stora
 const { doc, updateDoc, getDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
 const firebaseApp = require('../config/firebaseConfig');
-const storage = getStorage(firebaseApp.firebaseApp);
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 const { getStuntingThresholds } = require('../utils/stuntingUtils');
 const { performInference } = require('../utils/inferenceUtils');
 
+// nurseController.js
+const storage = getStorage(firebaseApp.firebaseApp);
 
+// Controller function to create a prediction
 const createPrediction = async (request, h) => {
     try {
         const { babyName, age, weight, id } = request.payload;
@@ -75,7 +76,7 @@ const createPrediction = async (request, h) => {
     }
 };
 
-
+// Controller function to get prediction data
 const getPredictionData = async (request, h) => {
     try {
         const userId = request.auth.credentials.uid;
@@ -93,6 +94,7 @@ const getPredictionData = async (request, h) => {
     }
 };
 
+// Controller function to modify a prediction
 const modifyPrediction = async (request, h) => {
     try {
         const { id } = request.params;
@@ -112,36 +114,37 @@ const modifyPrediction = async (request, h) => {
     }
 };
 
+// Controller function to update nurse profile
 const updateNurseProfile = async (request, h) => {
     try {
-      const userId = request.auth.credentials.uid;
-      const { name, password } = request.payload;
-      const profileImage = request.payload.profileImage;
-  
-      let updateData = {
-        ...(name && { name }),
-        ...(password && { password })
-      };
-  
-      if (profileImage) {
-        const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
-        const snapshot = await uploadBytes(storageRef, profileImage._data);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        updateData.profileImageUrl = downloadURL;
-      }
-  
-      const userDocRef = doc(db, "Users", userId);
-      await updateDoc(userDocRef, updateData);
-  
-      const updatedUserDoc = await getDoc(userDocRef);
-      return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
-  };
-};
-  
+        const userId = request.auth.credentials.uid;
+        const { name, password } = request.payload;
+        const profileImage = request.payload.profileImage;
 
+        let updateData = {
+            ...(name && { name }),
+            ...(password && { password })
+        };
+
+        if (profileImage) {
+            const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
+            const snapshot = await uploadBytes(storageRef, profileImage._data);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            updateData.profileImageUrl = downloadURL;
+        }
+
+        const userDocRef = doc(db, "Users", userId);
+        await updateDoc(userDocRef, updateData);
+
+        const updatedUserDoc = await getDoc(userDocRef);
+        return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
+    }
+};
+
+// Controller function to get prediction by ID
 const getPredictionByIdHandler = async (request, h) => {
     try {
         const { id } = request.params;
@@ -159,6 +162,7 @@ const getPredictionByIdHandler = async (request, h) => {
     }
 };
 
+// Controller function to delete a prediction
 const deletePredictionHandler = async (request, h) => {
     try {
         const { id } = request.params;
@@ -177,7 +181,6 @@ const deletePredictionHandler = async (request, h) => {
     }
 };
 
-
 module.exports = {
     createPrediction,
     getPredictionData,
@@ -186,4 +189,3 @@ module.exports = {
     getPredictionByIdHandler,
     deletePredictionHandler
 };
-

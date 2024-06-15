@@ -2,6 +2,7 @@ const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sig
 const { doc, setDoc } = require("firebase/firestore");
 const firebaseApp = require("../config/firebaseConfig.js");
 const { db } = require("../config/firebaseConfig.js");
+
 const auth = getAuth(firebaseApp.firebaseApp);
 
 exports.register = async (request, h) => {

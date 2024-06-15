@@ -1,5 +1,15 @@
-const { doc, setDoc, collection, getDocs, getDoc, updateDoc, deleteDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
+
+const { 
+    doc, 
+    setDoc, 
+    collection, 
+    getDocs, 
+    getDoc, 
+    updateDoc, 
+    deleteDoc 
+} = require("firebase/firestore");
+
 
 const savePrediction = async (userId, predictionData) => {
     try {
@@ -51,7 +61,6 @@ const updatePrediction = async (userId, predictionId, updates) => {
     }
 };
 
-
 const deletePrediction = async (userId, predictionId) => {
     try {
         const docRef = doc(db, "predictions", userId, "data", predictionId);
@@ -64,7 +73,6 @@ const deletePrediction = async (userId, predictionId) => {
 
 const updateProfile = async (userId, profileData) => {
     try {
-        
         const userDocRef = doc(db, "Users", userId);
         const userDocSnap = await getDoc(userDocRef);
         if (!userDocSnap.exists()) {
