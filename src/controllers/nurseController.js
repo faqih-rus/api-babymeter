@@ -1,6 +1,7 @@
 // nurseController.js
 const { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile, deletePrediction } = require('../services/nurseService');
 const axios = require('axios');
+const FormData = require('form-data');  // Import form-data
 const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const { doc, updateDoc, getDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
@@ -8,105 +9,45 @@ const firebaseApp = require('../config/firebaseConfig');
 const storage = getStorage(firebaseApp.firebaseApp);
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
+const { getStuntingThresholds } = require('../utils/stuntingUtils');
+const { performInference } = require('../utils/inferenceUtils');
 
-
-// const createPrediction = async (request, h) => {
-//     try {
-//         const { imageUrl, babyName, age, weight, id } = request.payload;
-//         const userId = request.auth.credentials.uid;
-
-//         const existingPrediction = await getPredictionById(userId, id);
-//         if (existingPrediction) {
-//             return h.response({ status: 'error', message: 'Prediction ID already exists' }).code(400);
-//         }
-
-//         console.log("Sending image URL to Flask server for processing...");
-//         const response = await axios.post('http://192.168.1.15:5000/predictions', {
-//             imageUrl: imageUrl
-//         });
-
-//         console.log("Received response from Flask server.");
-//         const mlResult = response.data;
-
-//         const { lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan } = mlResult;
-
-//         if (!lingkar_kepala || !lingkar_dada || !lingkar_lengan || !lingkar_perut || !lingkar_paha || !panjang_badan) {
-//             throw new Error('Incomplete prediction data');
-//         }
-
-//         const panjangBadanMeter = panjang_badan / 100;
-//         const bmi = weight / (panjangBadanMeter * panjangBadanMeter);
-
-//         let prediction = "Normal";
-//         let suggestion = "Pertumbuhan normal.";
-
-//         if (bmi < 14) {
-//             prediction = "Di Bawah Normal";
-//             suggestion = "Konsultasikan dengan dokter anak untuk evaluasi lebih lanjut.";
-//         } else if (bmi > 17) {
-//             prediction = "Di Atas Normal";
-//             suggestion = "Perhatikan asupan makanan dan aktivitas fisik bayi.";
-//         }
-
-//         const predictionData = {
-//             id: id,
-//             babyName: babyName,
-//             age: age,
-//             weight: weight,
-//             lingkar_kepala: lingkar_kepala,
-//             lingkar_dada: lingkar_dada,
-//             lingkar_lengan: lingkar_lengan,
-//             lingkar_perut: lingkar_perut,
-//             lingkar_paha: lingkar_paha,
-//             panjang_badan: panjang_badan,
-//             prediction: prediction,
-//             confidence: 0.95,
-//             suggestion: suggestion,
-//             createdAt: new Date().toISOString(),
-//             updatedAt: new Date().toISOString()
-//         };
-
-//         await savePrediction(userId, predictionData);
-//         return h.response({ status: 'success', data: predictionData }).code(201);
-//     } catch (error) {
-//         console.error('Error creating prediction:', error);
-//         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
-//     }
-// };
 
 const createPrediction = async (request, h) => {
     try {
-        const { imageUrl, babyName, age, weight, id } = request.payload;
-        // Hardcode data prediksi
-        const [lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan] = [20, 10, 5, 10, 15, 20];
+        const { babyName, age, weight, id } = request.payload;
+        const image = request.payload.image;
         const userId = request.auth.credentials.uid;
 
-        if (!lingkar_kepala || !lingkar_dada || !lingkar_lengan || !lingkar_perut || !lingkar_paha || !panjang_badan) {
-            throw new Error('Data prediksi tidak lengkap');
-        }
-
-        const existingPrediction = await getPredictionById(userId,id);
+        const existingPrediction = await getPredictionById(userId, id);
         if (existingPrediction) {
             return h.response({ status: 'error', message: 'Prediction ID already exists' }).code(400);
         }
 
-        // Konversi panjang_badan dari cm ke meter
-        const panjangBadanMeter = panjang_badan / 100;
+        console.log("Sending image to Flask server for processing...");
 
-        // Hitung BMI
-        const bmi = weight / (panjangBadanMeter * panjangBadanMeter);
+        const formData = new FormData();
+        formData.append('image', image._data, {
+            filename: 'image.jpg',
+            contentType: 'image/jpeg',
+        });
 
-        // Menentukan status pertumbuhan dan saran berdasarkan nilai BMI
-        let prediction = "Normal";
-        let suggestion = "Pertumbuhan normal.";
+        const response = await axios.post('http://34.101.242.192:5000/predict', formData, {
+            headers: { ...formData.getHeaders() }
+        });
 
-        if (bmi < 14) {
-            prediction = "Di Bawah Normal";
-            suggestion = "Konsultasikan dengan dokter anak untuk evaluasi lebih lanjut.";
-        } else if (bmi > 17) {
-            prediction = "Di Atas Normal";
-            suggestion = "Perhatikan asupan makanan dan aktivitas fisik bayi.";
+        console.log("Received response from Flask server.");
+        const mlResult = response.data;
+
+        const {
+            lingkar_kepala, lingkar_dada, lingkar_lengan, lingkar_perut, lingkar_paha, panjang_badan
+        } = mlResult;
+
+        if (!lingkar_kepala || !lingkar_dada || !lingkar_lengan || !lingkar_perut || !lingkar_paha || !panjang_badan) {
+            throw new Error('Incomplete prediction data');
         }
+
+        const { prediction, suggestion, confidence } = performInference(age, weight, panjang_badan, mlResult);
 
         const predictionData = {
             id: id,
@@ -120,8 +61,7 @@ const createPrediction = async (request, h) => {
             lingkar_paha: lingkar_paha,
             panjang_badan: panjang_badan,
             prediction: prediction,
-            confidence: 0.95,
-
+            confidence: confidence,
             suggestion: suggestion,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
@@ -134,6 +74,7 @@ const createPrediction = async (request, h) => {
         return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
 };
+
 
 const getPredictionData = async (request, h) => {
     try {
@@ -173,31 +114,32 @@ const modifyPrediction = async (request, h) => {
 
 const updateNurseProfile = async (request, h) => {
     try {
-        const userId = request.auth.credentials.uid;
-        const { name, password, profileImage } = request.payload;
-
-        let updateData = {
-            ...(name && { name }),
-            ...(password && { password })
-        };
-
-        if (profileImage) {
-            const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
-            const snapshot = await uploadBytes(storageRef, Buffer.from(profileImage, 'base64'));
-            const downloadURL = await getDownloadURL(snapshot.ref);
-            updateData.profileImageUrl = downloadURL;
-        }
-
-        const userDocRef = doc(db, "Users", userId);
-        await updateDoc(userDocRef, updateData);
-
-        const updatedUserDoc = await getDoc(userDocRef);
-        return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
+      const userId = request.auth.credentials.uid;
+      const { name, password } = request.payload;
+      const profileImage = request.payload.profileImage;
+  
+      let updateData = {
+        ...(name && { name }),
+        ...(password && { password })
+      };
+  
+      if (profileImage) {
+        const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
+        const snapshot = await uploadBytes(storageRef, profileImage._data);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        updateData.profileImageUrl = downloadURL;
+      }
+  
+      const userDocRef = doc(db, "Users", userId);
+      await updateDoc(userDocRef, updateData);
+  
+      const updatedUserDoc = await getDoc(userDocRef);
+      return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
     } catch (error) {
-        console.error('Error updating profile:', error);
-        return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
+      console.error('Error updating profile:', error);
+      return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
     }
-};
+  };
   
 
 const getPredictionByIdHandler = async (request, h) => {
@@ -222,7 +164,6 @@ const deletePredictionHandler = async (request, h) => {
         const { id } = request.params;
         const userId = request.auth.credentials.uid;
 
-        // Cek apakah prediksi dengan ID tersebut ada
         const prediction = await getPredictionById(userId, id);
         if (!prediction) {
             return h.response({ status: 'error', message: 'Prediction not found' }).code(404);
