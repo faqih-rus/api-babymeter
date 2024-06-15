@@ -144,6 +144,15 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
    - **URL**: `/api/predictions/{id}`
    - **Method**: `GET`
    - **Description**: Mengambil semua prediksi untuk pengguna tertentu.
+   - **Request Payload**:
+     ```json
+     {
+       "image" : "multipart/form",
+       "babyName" : "baby full name",
+       "age" : "age in month",
+       "weight" : "NIK (id) "
+     }
+     ```
    - **Response**:
      ```json
      [
@@ -173,11 +182,10 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
    - **Description**: Memperbarui prediksi tertentu.
    - **Request Payload**:
      ```json
-     {
-       "updates": {
-         "fieldToUpdate": "newValue"
-       }
-     }
+   {
+      "weight": "in kg",
+      "id": "NIK (id) "
+    }
      ```
    - **Response**:
      ```json
@@ -196,9 +204,9 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
    - **Request Payload**:
      ```json
      {
-       "profileData": {
-         "fieldToUpdate": "newValue"
-       }
+      "profileImage" : " multipart/form",
+      "name" : "nurse name",
+      "password" : "password akun nurse"
      }
      ```
    - **Response**:
@@ -209,26 +217,3 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      }
      ```
 
-## Contoh Payload untuk Update Prediction
-
-```json
-{
-  "updates": {
-    "age": 1,
-    "babyName": "Mishcka",
-    "confidence": 0.95,
-    "createdAt": "2024-06-08T06:06:05.463Z",
-    "id": "317305123456789",
-    "lingkar_dada": 35,
-    "lingkar_kepala": 45,
-    "lingkar_lengan": 15,
-    "lingkar_paha": 20,
-    "lingkar_perut": 25,
-    "panjang_badan": 70,
-    "prediction": "Di Atas Normal",
-    "suggestion": "Perhatikan asupan makanan dan aktivitas fisik bayi.",
-    "updatedAt": "2024-06-08T06:06:05.463Z",
-    "weight": 23
-  }
-}
-```
