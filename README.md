@@ -1,6 +1,6 @@
 #  BabyMeter 
 
-![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Cuplikan%20layar%202024-06-05%20110602.png)
+![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Untitled%20design%20(5).png)
 
 BabyMeter adalah aplikasi yang digunakan untuk memonitor pertumbuhan dan kesehatan bayi dengan memanfaatkan Firebase Authentication untuk autentikasi, Firestore untuk penyimpanan data prediksi, dan Hapi.js sebagai framework backend. 🚀
 
@@ -32,6 +32,8 @@ src
 ├── services/
 │   └── nurseService.js
 ├── utils/
+│   ├── inferenceUtils.js
+│   ├── stuntingUtils.js
 │   ├── corsHandler.js
 │   ├── errorHandler.js
 │   └── validators.js
@@ -188,7 +190,7 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
 ### Profile
 
 1. **Update Profile**
-   - **URL**: `/nurse/profile/{userId}`
+   - **URL**: `/nurse/profile/`
    - **Method**: `PUT`
    - **Description**: Memperbarui profil pengguna.
    - **Request Payload**:

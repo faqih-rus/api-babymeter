@@ -1,8 +1,7 @@
 // nurseController.js
 const { savePrediction, getPredictions, getPredictionById, updatePrediction, updateProfile, deletePrediction } = require('../services/nurseService');
 const axios = require('axios');
-const FormData = require('form-data');  // Import form-data
-const FormData = require('form-data');  // Import form-data
+const FormData = require('form-data');
 const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const { doc, updateDoc, getDoc } = require("firebase/firestore");
 const { db } = require('../config/firebaseConfig');
@@ -18,11 +17,8 @@ const createPrediction = async (request, h) => {
     try {
         const { babyName, age, weight, id } = request.payload;
         const image = request.payload.image;
-        const { babyName, age, weight, id } = request.payload;
-        const image = request.payload.image;
         const userId = request.auth.credentials.uid;
 
-        const existingPrediction = await getPredictionById(userId, id);
         const existingPrediction = await getPredictionById(userId, id);
         if (existingPrediction) {
             return h.response({ status: 'error', message: 'Prediction ID already exists' }).code(400);
@@ -139,35 +135,11 @@ const updateNurseProfile = async (request, h) => {
   
       const updatedUserDoc = await getDoc(userDocRef);
       return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
-      const userId = request.auth.credentials.uid;
-      const { name, password } = request.payload;
-      const profileImage = request.payload.profileImage;
-  
-      let updateData = {
-        ...(name && { name }),
-        ...(password && { password })
-      };
-  
-      if (profileImage) {
-        const storageRef = ref(storage, `profiles/${userId}/${uuidv4()}`);
-        const snapshot = await uploadBytes(storageRef, profileImage._data);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        updateData.profileImageUrl = downloadURL;
-      }
-  
-      const userDocRef = doc(db, "Users", userId);
-      await updateDoc(userDocRef, updateData);
-  
-      const updatedUserDoc = await getDoc(userDocRef);
-      return h.response({ status: 'success', data: updatedUserDoc.data() }).code(200);
     } catch (error) {
       console.error('Error updating profile:', error);
       return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
-      console.error('Error updating profile:', error);
-      return h.response({ status: 'error', message: 'Internal Server Error' }).code(500);
-    }
   };
-  };
+};
   
 
 const getPredictionByIdHandler = async (request, h) => {
