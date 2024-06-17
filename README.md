@@ -2,7 +2,7 @@
 
 URL Backend = http://34.128.99.253:3000/
 
-![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Untitled%20design%20(5).png)
+![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Babymeter%20Logo%20HD.png)
 
 BabyMeter adalah aplikasi yang digunakan untuk memonitor pertumbuhan dan kesehatan bayi dengan memanfaatkan Firebase Authentication untuk autentikasi, Firestore untuk penyimpanan data prediksi, dan Hapi.js sebagai framework backend. 🚀
 
