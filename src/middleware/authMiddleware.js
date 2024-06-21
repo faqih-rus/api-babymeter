@@ -17,7 +17,7 @@ module.exports = {
         const token = authorization.replace('Bearer ', '');
         try {
           const decodedToken = await admin.auth().verifyIdToken(token);
-          console.log('Decoded Token:', decodedToken); // Debugging log
+          console.log('Decoded Token:', decodedToken);
           return h.authenticated({ credentials: decodedToken });
         } catch (error) {
           console.error('Invalid token:', error);

@@ -7,6 +7,11 @@ module.exports = [
     path: '/auth/register',
     options: {
       auth: false,
+      payload: {
+        output: 'stream',
+        parse: true,
+        multipart: true
+      },
       validate: {
         payload: Joi.object({
           email: Joi.string().email().required(),
@@ -22,6 +27,11 @@ module.exports = [
     path: '/auth/login',
     options: {
       auth: false,
+      payload: {
+        output: 'stream',
+        parse: true,
+        multipart: true
+      },
       validate: {
         payload: Joi.object({
           email: Joi.string().email().required(),

@@ -1,5 +1,4 @@
 const { db } = require('../config/firebaseConfig');
-
 const { 
     doc, 
     setDoc, 
@@ -10,23 +9,22 @@ const {
     deleteDoc 
 } = require("firebase/firestore");
 
-
-const savePrediction = async (userId, predictionData) => {
+const savePrediction = async (predictionData) => {
     try {
-        const userPredictionDoc = doc(db, "predictions", userId, "data", predictionData.id);
-        await setDoc(userPredictionDoc, predictionData);
+        const predictionDoc = doc(db, "predictions", predictionData.nik);
+        await setDoc(predictionDoc, predictionData);
     } catch (error) {
         console.error('Error saving prediction:', error);
         throw error;
     }
 };
 
-const getPredictions = async (userId) => {
+const getPredictions = async () => {
     try {
-        const userPredictionsCollection = collection(db, "predictions", userId, "data");
-        const snapshot = await getDocs(userPredictionsCollection);
+        const predictionsCollection = collection(db, "predictions");
+        const snapshot = await getDocs(predictionsCollection);
         const predictions = snapshot.docs.map(doc => ({
-            id: doc.id,
+            nik: doc.id,
             ...doc.data()
         }));
         return predictions;
@@ -36,24 +34,24 @@ const getPredictions = async (userId) => {
     }
 };
 
-const getPredictionById = async (userId, predictionId) => {
+const getPredictionById = async (predictionNik) => {
     try {
-        const docRef = doc(db, "predictions", userId, "data", predictionId);
+        const docRef = doc(db, "predictions", predictionNik);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() };
+            return { nik: docSnap.id, ...docSnap.data() };
         } else {
             return null;
         }
     } catch (error) {
-        console.error("Error fetching prediction by ID:", error);
+        console.error("Error fetching prediction by NIK:", error);
         throw error;
     }
 };
 
-const updatePrediction = async (userId, predictionId, updates) => {
+const updatePrediction = async (predictionNik, updates) => {
     try {
-        const docRef = doc(db, "predictions", userId, "data", predictionId);
+        const docRef = doc(db, "predictions", predictionNik);
         await updateDoc(docRef, updates);
     } catch (error) {
         console.error("Error updating prediction:", error);
@@ -61,9 +59,9 @@ const updatePrediction = async (userId, predictionId, updates) => {
     }
 };
 
-const deletePrediction = async (userId, predictionId) => {
+const deletePrediction = async (predictionNik) => {
     try {
-        const docRef = doc(db, "predictions", userId, "data", predictionId);
+        const docRef = doc(db, "predictions", predictionNik);
         await deleteDoc(docRef);
     } catch (error) {
         console.error("Error deleting prediction:", error);

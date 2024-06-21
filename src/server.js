@@ -13,8 +13,8 @@ const init = async () => {
     host: process.env.HOST || '0.0.0.0',
     routes: {
       payload: {
-        maxBytes: 10485760 
-      }
+        maxBytes: 1048576 * 10
+    }
     }
   });
 
