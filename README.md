@@ -1,53 +1,16 @@
-#  BabyMeter 
-
-URL Backend = http://34.128.99.253:3000/
-
-![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Babymeter%20Logo%20HD.png)
-![Architecture-Backend](https://storage.googleapis.com/asset-design/architecture-backend/Diagram%20Tanpa%20Judul.jpg)
-BabyMeter adalah aplikasi yang digunakan untuk memonitor pertumbuhan dan kesehatan bayi dengan memanfaatkan Firebase Authentication untuk autentikasi, Firestore untuk penyimpanan data prediksi, dan Hapi.js sebagai framework backend. 🚀
-
-## 🌟 Fitur Utama
-
-- **📝 Register**: Perawat dapat mendaftar menggunakan Firebase Authentication.
-- **🔑 Login**: Perawat dapat masuk ke aplikasi menggunakan Firebase Authentication.
-- **🔮 Prediksi**: Aplikasi dapat membuat prediksi berdasarkan gambar yang diunggah.
-- **💾 Simpan Prediksi**: Hasil prediksi disimpan di Firestore.
-- **📊 Ambil Prediksi**: Data prediksi dapat diambil dari Firestore.
-- **✏️ Edit Prediksi**: Prediksi yang sudah ada dapat diedit (berat dan tinggi badan).
-- **👩‍⚕️ Perbarui Profil Perawat**: Perawat dapat memperbarui profil mereka.
-
-## 📂 Struktur Folder
-
-```
-src
-├── config/
-│   ├── firebaseConfig.js
-│   ├── config.js
-├── controllers/
-│   ├── authController.js
-│   └── nurseController.js
-├── middleware/
-│   └── authMiddleware.js
-├── routes/
-│   ├── authRoutes.js
-│   └── nurseRoutes.js
-├── services/
-│   └── nurseService.js
-├── utils/
-│   ├── inferenceUtils.js
-│   ├── stuntingUtils.js
-│   ├── corsHandler.js
-│   ├── errorHandler.js
-│   └── validators.js
-├── server.js
-├── package.json
-├── .env
-└── README.md
-```
+Berikut adalah README yang diperbarui dengan gambar logo dan arsitektur backend.
 
 # BabyMeter API Documentation
 
+![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Babymeter%20Logo%20HD.png)
+
 BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan memprediksi pertumbuhan bayi. API ini memungkinkan pengguna untuk mendaftar, masuk, membuat prediksi pertumbuhan bayi, dan mengelola profil mereka.
+
+## URL Backend
+http://34.128.99.253:3000/
+
+## Architecture
+![Architecture-Backend](https://storage.googleapis.com/asset-design/architecture-backend/Diagram%20Tanpa%20Judul.jpg)
 
 ## Endpoints
 
@@ -143,18 +106,9 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      ```
 
 2. **Get Predictions**
-   - **URL**: `/api/predictions/{id}`
+   - **URL**: `/nurse/predictions/`
    - **Method**: `GET`
-   - **Description**: Mengambil semua prediksi untuk pengguna tertentu.
-   - **Request Payload**:
-     ```json
-     {
-       "image" : "multipart/form",
-       "babyName" : "baby full name",
-       "age" : "age in month",
-       "weight" : "NIK (id) "
-     }
-     ```
+   - **Description**: Mengambil semua prediksi.
    - **Response**:
      ```json
      [
@@ -178,16 +132,41 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      ]
      ```
 
-3. **Update Prediction**
+3. **Get Prediction by ID**
+   - **URL**: `/nurse/predictions/{id}`
+   - **Method**: `GET`
+   - **Description**: Mengambil prediksi berdasarkan ID.
+   - **Response**:
+     ```json
+     {
+       "id": "string",
+       "age": "number",
+       "babyName": "string",
+       "confidence": "number",
+       "createdAt": "string",
+       "lingkar_dada": "number",
+       "lingkar_kepala": "number",
+       "lingkar_lengan": "number",
+       "lingkar_paha": "number",
+       "lingkar_perut": "number",
+       "panjang_badan": "number",
+       "prediction": "string",
+       "suggestion": "string",
+       "updatedAt": "string",
+       "weight": "number"
+     }
+     ```
+
+4. **Update Prediction**
    - **URL**: `/nurse/predictions/{id}`
    - **Method**: `PUT`
    - **Description**: Memperbarui prediksi tertentu.
    - **Request Payload**:
      ```json
-   {
-      "weight": "in kg",
-      "id": "NIK (id) "
-    }
+     {
+       "weight": "in kg",
+       "id": "NIK (id)"
+     }
      ```
    - **Response**:
      ```json
@@ -206,9 +185,9 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
    - **Request Payload**:
      ```json
      {
-      "profileImage" : " multipart/form",
-      "name" : "nurse name",
-      "password" : "password akun nurse"
+       "profileImage": "multipart/form-data",
+       "name": "nurse name",
+       "password": "password akun nurse"
      }
      ```
    - **Response**:
@@ -219,3 +198,68 @@ BabyMeter adalah sebuah proyek yang menyediakan API untuk memantau dan mempredik
      }
      ```
 
+## Usage Example
+
+### Register User
+```bash
+curl -X POST http://34.128.99.253:3000/auth/register \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "Test User"
+}'
+```
+
+### Login User
+```bash
+curl -X POST http://34.128.99.253:3000/auth/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "test@example.com",
+  "password": "password123"
+}'
+```
+
+### Create Prediction
+```bash
+curl -X POST http://34.128.99.253:3000/nurse/predictions \
+-H "Authorization: Bearer {idToken}" \
+-H "Content-Type: application/json" \
+-d '{
+  "userId": "user_id",
+  "predictionData": {
+    "age": 12,
+    "babyName": "John Doe",
+    "confidence": 0.95,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "id": "123456",
+    "lingkar_dada": 30.0,
+    "lingkar_kepala": 40.0,
+    "lingkar_lengan": 15.0,
+    "lingkar_paha": 20.0,
+    "lingkar_perut": 35.0,
+    "panjang_badan": 50.0,
+    "prediction": "Normal",
+    "suggestion": "Keep up the good work!",
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "weight": 7.5
+  }
+}'
+```
+
+### Get Predictions
+```bash
+curl -X GET http://34.128.99.253:3000/nurse/predictions \
+-H "Authorization: Bearer {idToken}"
+```
+
+### Update Profile
+```bash
+curl -X PUT http://34.128.99.253:3000/nurse/profile/ \
+-H "Authorization: Bearer {idToken}" \
+-H "Content-Type: multipart/form-data" \
+-F "profileImage=@path/to/image.jpg" \
+-F "name=New Name" \
+-F "password=newpassword123"
+```
