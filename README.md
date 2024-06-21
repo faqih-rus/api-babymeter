@@ -83,7 +83,7 @@ http://34.128.99.253:3000/
          "babyName": "string",
          "confidence": "number",
          "createdAt": "string",
-         "id": "string",
+         "nik": "string",
          "lingkar_dada": "number",
          "lingkar_kepala": "number",
          "lingkar_lengan": "number",
@@ -113,7 +113,7 @@ http://34.128.99.253:3000/
      ```json
      [
        {
-         "id": "string",
+         "nik": "string",
          "age": "number",
          "babyName": "string",
          "confidence": "number",
@@ -139,7 +139,7 @@ http://34.128.99.253:3000/
    - **Response**:
      ```json
      {
-       "id": "string",
+       "nik": "string",
        "age": "number",
        "babyName": "string",
        "confidence": "number",
@@ -165,7 +165,7 @@ http://34.128.99.253:3000/
      ```json
      {
        "weight": "in kg",
-       "id": "NIK (id)"
+       "nik": "NIK"
      }
      ```
    - **Response**:
