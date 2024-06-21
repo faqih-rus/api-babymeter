@@ -1,6 +1,4 @@
-Berikut adalah README yang diperbarui dengan gambar logo dan arsitektur backend.
-
-# BabyMeter API Documentation
+## BabyMeter API Documentation
 
 ![BabyMeter Logo](https://storage.googleapis.com/asset-design/logo/Babymeter%20Logo%20HD.png)
 
